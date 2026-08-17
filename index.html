@@ -1,1 +1,236 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <title>DualPlay — Écran principal</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: #090b10;
+            color: white;
+            font-family: Arial, Helvetica, sans-serif;
+            overflow: hidden;
+        }
+
+        #app {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 25px;
+            background: #11151d;
+            border-bottom: 1px solid #272d38;
+        }
+
+        .logo {
+            font-size: 25px;
+            font-weight: bold;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            color: #aaa;
+        }
+
+        .status-dot {
+            width: 11px;
+            height: 11px;
+            border-radius: 50%;
+            background: #777;
+        }
+
+        .status-dot.connected {
+            background: #36d46b;
+            box-shadow: 0 0 12px #36d46b;
+        }
+
+        main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 25px;
+        }
+
+        #menu {
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        #menu h1 {
+            font-size: 48px;
+            margin: 0 0 10px;
+        }
+
+        #menu p {
+            color: #999;
+            font-size: 18px;
+        }
+
+        .code-box {
+            margin: 35px auto;
+            padding: 25px;
+            background: #121720;
+            border: 1px solid #303845;
+            border-radius: 18px;
+        }
+
+        .code-title {
+            color: #aaa;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        #sessionCode {
+            font-size: 48px;
+            letter-spacing: 10px;
+            font-weight: bold;
+        }
+
+        #connectionMessage {
+            color: #aaa;
+            margin-top: 15px;
+        }
+
+        #gameScreen {
+            display: none;
+            width: min(1000px, 95vw);
+        }
+
+        #gameCanvas {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            display: block;
+            background: #101722;
+            border: 2px solid #303845;
+            border-radius: 15px;
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 12px;
+            color: #888;
+            font-size: 14px;
+        }
+
+        #waiting {
+            color: #ffcc66;
+        }
+
+        footer {
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 12px;
+        }
+
+        @media(max-width: 600px) {
+            #sessionCode {
+                font-size: 35px;
+            }
+
+            #menu h1 {
+                font-size: 36px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div id="app">
+
+    <header>
+        <div class="logo">
+            DualPlay
+        </div>
+
+        <div class="status">
+            <div id="statusDot" class="status-dot"></div>
+            <span id="statusText">Initialisation...</span>
+        </div>
+    </header>
+
+    <main>
+
+        <!-- MENU PC -->
+
+        <section id="menu">
+
+            <h1>DualPlay</h1>
+
+            <p>
+                Connectez votre téléphone pour jouer.
+            </p>
+
+            <div class="code-box">
+
+                <div class="code-title">
+                    CODE DE CONNEXION
+                </div>
+
+                <div id="sessionCode">
+                    ------
+                </div>
+
+                <div id="connectionMessage">
+                    En attente du téléphone...
+                </div>
+
+            </div>
+
+            <div id="waiting">
+                📱 Ouvrez controller.html sur votre téléphone
+            </div>
+
+        </section>
+
+
+        <!-- JEU -->
+
+        <section id="gameScreen">
+
+            <canvas id="gameCanvas" width="1280" height="720"></canvas>
+
+            <div class="game-info">
+                <span>🎮 DualPlay Demo</span>
+                <span id="gameStatus">
+                    Téléphone connecté
+                </span>
+            </div>
+
+        </section>
+
+    </main>
+
+    <footer>
+        DualPlay • PC + Téléphone
+    </footer>
+
+</div>
+
+<script type="module" src="app.js"></script>
+
+</body>
+</html>
