@@ -1,1 +1,545 @@
+<!DOCTYPE html>
+<html lang="fr">
 
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width,
+                 initial-scale=1.0,
+                 maximum-scale=1.0,
+                 user-scalable=no"
+    >
+
+    <title>DualPlay — Manette</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html,
+        body {
+
+            margin: 0;
+            padding: 0;
+
+            width: 100%;
+            height: 100%;
+
+            overflow: hidden;
+
+            background: #090b10;
+            color: white;
+
+            font-family: Arial, Helvetica, sans-serif;
+
+            touch-action: none;
+        }
+
+
+        #app {
+
+            width: 100%;
+            height: 100%;
+
+            display: flex;
+            flex-direction: column;
+        }
+
+
+        header {
+
+            height: 60px;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            padding: 0 15px;
+
+            background: #11151d;
+
+            border-bottom:
+                1px solid #272d38;
+        }
+
+
+        .logo {
+
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+
+        #connectionStatus {
+
+            font-size: 12px;
+            color: #aaa;
+        }
+
+
+        #connectScreen {
+
+            flex: 1;
+
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
+
+            padding: 25px;
+        }
+
+
+        .connect-box {
+
+            width: 100%;
+            max-width: 400px;
+
+            background: #121720;
+
+            border:
+                1px solid #303845;
+
+            border-radius: 18px;
+
+            padding: 25px;
+
+            text-align: center;
+        }
+
+
+        .connect-box h1 {
+
+            margin-top: 0;
+        }
+
+
+        #codeInput {
+
+            width: 100%;
+
+            padding: 18px;
+
+            border: none;
+
+            border-radius: 12px;
+
+            background: #080b10;
+
+            color: white;
+
+            text-align: center;
+
+            font-size: 30px;
+
+            letter-spacing: 7px;
+
+            outline: none;
+        }
+
+
+        #connectButton {
+
+            width: 100%;
+
+            margin-top: 15px;
+
+            padding: 18px;
+
+            border: none;
+
+            border-radius: 12px;
+
+            background: #4d9cff;
+
+            color: white;
+
+            font-size: 17px;
+
+            font-weight: bold;
+        }
+
+
+        #connectMessage {
+
+            color: #999;
+
+            margin-top: 15px;
+
+            min-height: 20px;
+        }
+
+
+        #controller {
+
+            display: none;
+
+            flex: 1;
+
+            position: relative;
+
+            padding: 15px;
+        }
+
+
+        .controller-area {
+
+            position: absolute;
+
+            inset: 15px;
+
+        }
+
+
+        /* D-PAD */
+
+        .dpad {
+
+            position: absolute;
+
+            left: 15px;
+            bottom: 30px;
+
+            width: 180px;
+            height: 180px;
+        }
+
+
+        .dpad button {
+
+            position: absolute;
+
+            width: 60px;
+            height: 60px;
+
+            border: none;
+
+            background: #1c2430;
+
+            color: white;
+
+            font-size: 25px;
+
+            border-radius: 12px;
+
+            box-shadow:
+                inset 0 0 0 1px #303b4b;
+        }
+
+
+        .dpad button:active {
+
+            background: #4d9cff;
+
+            transform: scale(.94);
+        }
+
+
+        #up {
+            left: 60px;
+            top: 0;
+        }
+
+        #left {
+            left: 0;
+            top: 60px;
+        }
+
+        #right {
+            right: 0;
+            top: 60px;
+        }
+
+        #down {
+            left: 60px;
+            bottom: 0;
+        }
+
+
+        /* BOUTONS */
+
+        .buttons {
+
+            position: absolute;
+
+            right: 15px;
+            bottom: 35px;
+
+            width: 190px;
+            height: 190px;
+        }
+
+
+        .game-button {
+
+            position: absolute;
+
+            width: 65px;
+            height: 65px;
+
+            border: none;
+
+            border-radius: 50%;
+
+            background: #1c2430;
+
+            color: white;
+
+            font-weight: bold;
+
+            font-size: 20px;
+
+            box-shadow:
+                inset 0 0 0 1px #303b4b;
+        }
+
+
+        .game-button:active {
+
+            background: #4d9cff;
+
+            transform: scale(.92);
+        }
+
+
+        #buttonY {
+
+            left: 62px;
+            top: 0;
+        }
+
+
+        #buttonX {
+
+            left: 0;
+            top: 62px;
+        }
+
+
+        #buttonB {
+
+            right: 0;
+            top: 62px;
+        }
+
+
+        #buttonA {
+
+            left: 62px;
+            bottom: 0;
+        }
+
+
+        /* START / SELECT */
+
+        .system-buttons {
+
+            position: absolute;
+
+            top: 20px;
+            left: 50%;
+
+            transform:
+                translateX(-50%);
+
+            display: flex;
+
+            gap: 10px;
+        }
+
+
+        .system-buttons button {
+
+            border: none;
+
+            padding: 10px 18px;
+
+            border-radius: 20px;
+
+            background: #1c2430;
+
+            color: white;
+        }
+
+
+        @media(max-width: 400px) {
+
+            .dpad {
+
+                transform:
+                    scale(.85);
+
+                transform-origin:
+                    bottom left;
+            }
+
+            .buttons {
+
+                transform:
+                    scale(.85);
+
+                transform-origin:
+                    bottom right;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+<div id="app">
+
+    <header>
+
+        <div class="logo">
+            DualPlay
+        </div>
+
+        <div id="connectionStatus">
+            Non connecté
+        </div>
+
+    </header>
+
+
+    <!-- CONNEXION -->
+
+    <section id="connectScreen">
+
+        <div class="connect-box">
+
+            <h1>📱 Manette</h1>
+
+            <p>
+                Entrez le code affiché sur le PC.
+            </p>
+
+            <input
+                id="codeInput"
+                type="tel"
+                inputmode="numeric"
+                maxlength="6"
+                placeholder="000000"
+            >
+
+            <button id="connectButton">
+                CONNECTER
+            </button>
+
+            <div id="connectMessage"></div>
+
+        </div>
+
+    </section>
+
+
+    <!-- MANETTE -->
+
+    <section id="controller">
+
+        <div class="controller-area">
+
+
+            <div class="system-buttons">
+
+                <button id="select">
+                    SELECT
+                </button>
+
+                <button id="start">
+                    START
+                </button>
+
+            </div>
+
+
+            <!-- D-PAD -->
+
+            <div class="dpad">
+
+                <button
+                    id="up"
+                    data-button="up">
+                    ▲
+                </button>
+
+                <button
+                    id="left"
+                    data-button="left">
+                    ◀
+                </button>
+
+                <button
+                    id="right"
+                    data-button="right">
+                    ▶
+                </button>
+
+                <button
+                    id="down"
+                    data-button="down">
+                    ▼
+                </button>
+
+            </div>
+
+
+            <!-- A B X Y -->
+
+            <div class="buttons">
+
+                <button
+                    class="game-button"
+                    id="buttonY"
+                    data-button="Y">
+                    Y
+                </button>
+
+                <button
+                    class="game-button"
+                    id="buttonX"
+                    data-button="X">
+                    X
+                </button>
+
+                <button
+                    class="game-button"
+                    id="buttonB"
+                    data-button="B">
+                    B
+                </button>
+
+                <button
+                    class="game-button"
+                    id="buttonA"
+                    data-button="A">
+                    A
+                </button>
+
+            </div>
+
+        </div>
+
+    </section>
+
+</div>
+
+
+<script
+    type="module"
+    src="controller.js">
+</script>
+
+</body>
+
+</html>
