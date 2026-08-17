@@ -1,545 +1,767 @@
 <!DOCTYPE html>
 <html lang="fr">
-
 <head>
+<meta charset="UTF-8">
 
-    <meta charset="UTF-8">
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+>
 
-    <meta
-        name="viewport"
-        content="width=device-width,
-                 initial-scale=1.0,
-                 maximum-scale=1.0,
-                 user-scalable=no"
-    >
+<title>DualPlay Controller</title>
 
-    <title>DualPlay — Manette</title>
+<style>
 
-    <style>
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+}
 
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
+html,
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #080a0f;
+    color: white;
+    font-family: Arial, Helvetica, sans-serif;
+    touch-action: none;
+}
 
-        html,
-        body {
 
-            margin: 0;
-            padding: 0;
+/* ========================================
+   ÉCRAN DE CONNEXION
+======================================== */
 
-            width: 100%;
-            height: 100%;
+#connectScreen {
 
-            overflow: hidden;
+    width: 100vw;
+    height: 100vh;
 
-            background: #090b10;
-            color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-            font-family: Arial, Helvetica, sans-serif;
+    background: #080a0f;
+}
 
-            touch-action: none;
-        }
 
+.connectBox {
 
-        #app {
+    width: 90%;
+    max-width: 430px;
 
-            width: 100%;
-            height: 100%;
+    padding: 35px;
 
-            display: flex;
-            flex-direction: column;
-        }
+    background: #121722;
 
+    border-radius: 24px;
 
-        header {
+    text-align: center;
 
-            height: 60px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.5);
+}
 
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
 
-            padding: 0 15px;
+.connectBox h1 {
 
-            background: #11151d;
+    margin: 0 0 8px;
 
-            border-bottom:
-                1px solid #272d38;
-        }
+    font-size: 36px;
+}
 
 
-        .logo {
+.connectBox p {
 
-            font-size: 20px;
-            font-weight: bold;
-        }
+    color: #858b96;
+}
 
 
-        #connectionStatus {
+#codeInput {
 
-            font-size: 12px;
-            color: #aaa;
-        }
+    width: 100%;
 
+    padding: 16px;
 
-        #connectScreen {
+    margin-top: 15px;
 
-            flex: 1;
+    border: 2px solid #252d3a;
 
-            display: flex;
+    border-radius: 14px;
 
-            align-items: center;
-            justify-content: center;
+    outline: none;
 
-            padding: 25px;
-        }
+    background: #080a0f;
 
+    color: white;
 
-        .connect-box {
+    text-align: center;
 
-            width: 100%;
-            max-width: 400px;
+    font-size: 28px;
 
-            background: #121720;
+    letter-spacing: 8px;
+}
 
-            border:
-                1px solid #303845;
 
-            border-radius: 18px;
+#codeInput:focus {
 
-            padding: 25px;
+    border-color: #4d9cff;
+}
 
-            text-align: center;
-        }
 
+#connectButton {
 
-        .connect-box h1 {
+    width: 100%;
 
-            margin-top: 0;
-        }
+    margin-top: 15px;
 
+    padding: 17px;
 
-        #codeInput {
+    border: none;
 
-            width: 100%;
+    border-radius: 14px;
 
-            padding: 18px;
+    background: #4d9cff;
 
-            border: none;
+    color: white;
 
-            border-radius: 12px;
+    font-size: 17px;
 
-            background: #080b10;
+    font-weight: bold;
+}
 
-            color: white;
 
-            text-align: center;
+#connectMessage {
 
-            font-size: 30px;
+    min-height: 20px;
 
-            letter-spacing: 7px;
+    margin-top: 15px;
 
-            outline: none;
-        }
+}
 
 
-        #connectButton {
+/* ========================================
+   MANETTE
+======================================== */
 
-            width: 100%;
+#controller {
 
-            margin-top: 15px;
+    display: none;
 
-            padding: 18px;
+    position: relative;
 
-            border: none;
+    width: 100vw;
+    height: 100vh;
 
-            border-radius: 12px;
+    overflow: hidden;
 
-            background: #4d9cff;
+    background:
+        radial-gradient(
+            circle at center,
+            #111722 0%,
+            #080a0f 70%
+        );
+}
 
-            color: white;
 
-            font-size: 17px;
+/* ========================================
+   BARRE DU HAUT
+======================================== */
 
-            font-weight: bold;
-        }
+#topBar {
 
+    position: absolute;
 
-        #connectMessage {
+    left: 50%;
+    top: 18px;
 
-            color: #999;
+    transform: translateX(-50%);
 
-            margin-top: 15px;
+    display: flex;
 
-            min-height: 20px;
-        }
+    align-items: center;
 
+    gap: 14px;
 
-        #controller {
+    z-index: 20;
+}
 
-            display: none;
 
-            flex: 1;
+.systemButton {
 
-            position: relative;
+    border: none;
 
-            padding: 15px;
-        }
+    padding: 9px 20px;
 
+    border-radius: 20px;
 
-        .controller-area {
+    background: #1c2430;
 
-            position: absolute;
+    color: white;
 
-            inset: 15px;
+    font-size: 12px;
 
-        }
+    font-weight: bold;
+}
 
 
-        /* D-PAD */
+.systemButton:active {
 
-        .dpad {
+    background: #4d9cff;
 
-            position: absolute;
+    transform: scale(.92);
+}
 
-            left: 15px;
-            bottom: 30px;
 
-            width: 180px;
-            height: 180px;
-        }
+/* ========================================
+   JEU SELECTIONNE
+======================================== */
 
+#gameSelector {
 
-        .dpad button {
+    position: absolute;
 
-            position: absolute;
+    top: 67px;
 
-            width: 60px;
-            height: 60px;
+    left: 50%;
 
-            border: none;
+    transform: translateX(-50%);
 
-            background: #1c2430;
+    text-align: center;
 
-            color: white;
+    z-index: 10;
 
-            font-size: 25px;
+    white-space: nowrap;
+}
 
-            border-radius: 12px;
 
-            box-shadow:
-                inset 0 0 0 1px #303b4b;
-        }
+#selectedGame {
 
+    font-size: 24px;
 
-        .dpad button:active {
+    font-weight: bold;
+}
 
-            background: #4d9cff;
 
-            transform: scale(.94);
-        }
+#selectorHelp {
 
+    margin-top: 5px;
 
-        #up {
-            left: 60px;
-            top: 0;
-        }
+    font-size: 11px;
 
-        #left {
-            left: 0;
-            top: 60px;
-        }
+    color: #707784;
+}
 
-        #right {
-            right: 0;
-            top: 60px;
-        }
 
-        #down {
-            left: 60px;
-            bottom: 0;
-        }
+/* ========================================
+   JOYSTICK
+======================================== */
 
+#joystick {
 
-        /* BOUTONS */
+    position: absolute;
 
-        .buttons {
+    left: 6vw;
+    bottom: 9vh;
 
-            position: absolute;
+    width: 190px;
+    height: 190px;
 
-            right: 15px;
-            bottom: 35px;
+    border-radius: 50%;
 
-            width: 190px;
-            height: 190px;
-        }
+    background: #111722;
 
+    border: 3px solid #283342;
 
-        .game-button {
+    box-shadow:
+        inset 0 0 30px rgba(0,0,0,.7),
+        0 10px 30px rgba(0,0,0,.3);
+}
 
-            position: absolute;
 
-            width: 65px;
-            height: 65px;
+#joystickKnob {
 
-            border: none;
+    position: absolute;
 
-            border-radius: 50%;
+    left: 50%;
+    top: 50%;
 
-            background: #1c2430;
+    width: 82px;
+    height: 82px;
 
-            color: white;
+    margin-left: -41px;
+    margin-top: -41px;
 
-            font-weight: bold;
+    border-radius: 50%;
 
-            font-size: 20px;
+    background: #4d9cff;
 
-            box-shadow:
-                inset 0 0 0 1px #303b4b;
-        }
+    box-shadow:
+        0 8px 25px rgba(0,0,0,.5);
 
+    transition: transform .04s linear;
+}
 
-        .game-button:active {
 
-            background: #4d9cff;
+/* ========================================
+   D-PAD
+======================================== */
 
-            transform: scale(.92);
-        }
+#dpad {
 
+    position: absolute;
 
-        #buttonY {
+    left: 29vw;
+    bottom: 10vh;
 
-            left: 62px;
-            top: 0;
-        }
+    width: 165px;
+    height: 165px;
+}
 
 
-        #buttonX {
+.dpadButton {
 
-            left: 0;
-            top: 62px;
-        }
+    position: absolute;
 
+    width: 55px;
+    height: 55px;
 
-        #buttonB {
+    border: none;
 
-            right: 0;
-            top: 62px;
-        }
+    border-radius: 12px;
 
+    background: #1b2330;
 
-        #buttonA {
+    color: white;
 
-            left: 62px;
-            bottom: 0;
-        }
+    font-size: 22px;
 
+    box-shadow: 0 5px 15px rgba(0,0,0,.25);
+}
 
-        /* START / SELECT */
 
-        .system-buttons {
+#up {
 
-            position: absolute;
+    left: 55px;
+    top: 0;
+}
 
-            top: 20px;
-            left: 50%;
 
-            transform:
-                translateX(-50%);
+#left {
 
-            display: flex;
+    left: 0;
+    top: 55px;
+}
 
-            gap: 10px;
-        }
 
+#right {
 
-        .system-buttons button {
+    right: 0;
+    top: 55px;
+}
 
-            border: none;
 
-            padding: 10px 18px;
+#down {
 
-            border-radius: 20px;
+    left: 55px;
+    bottom: 0;
+}
 
-            background: #1c2430;
 
-            color: white;
-        }
+.dpadButton:active {
 
+    background: #4d9cff;
 
-        @media(max-width: 400px) {
+    transform: scale(.9);
+}
 
-            .dpad {
 
-                transform:
-                    scale(.85);
+/* ========================================
+   BOUTONS A B X Y
+======================================== */
 
-                transform-origin:
-                    bottom left;
-            }
+#buttons {
 
-            .buttons {
+    position: absolute;
 
-                transform:
-                    scale(.85);
+    right: 7vw;
+    bottom: 7vh;
 
-                transform-origin:
-                    bottom right;
-            }
+    width: 220px;
+    height: 220px;
+}
 
-        }
 
-    </style>
+.gameButton {
 
+    position: absolute;
+
+    width: 72px;
+    height: 72px;
+
+    border: none;
+
+    border-radius: 50%;
+
+    background: #1b2330;
+
+    color: white;
+
+    font-size: 22px;
+
+    font-weight: bold;
+
+    box-shadow:
+        0 7px 20px rgba(0,0,0,.35);
+}
+
+
+#buttonY {
+
+    left: 74px;
+    top: 0;
+}
+
+
+#buttonX {
+
+    left: 0;
+    top: 74px;
+}
+
+
+#buttonB {
+
+    right: 0;
+    top: 74px;
+}
+
+
+#buttonA {
+
+    left: 74px;
+    bottom: 0;
+}
+
+
+.gameButton:active {
+
+    background: #4d9cff;
+
+    transform: scale(.88);
+}
+
+
+/* ========================================
+   MESSAGE ROTATION
+======================================== */
+
+#rotateMessage {
+
+    display: none;
+
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 999;
+
+    background: #080a0f;
+
+    align-items: center;
+
+    justify-content: center;
+
+    text-align: center;
+
+    padding: 30px;
+}
+
+
+#rotateMessage div {
+
+    max-width: 350px;
+
+    font-size: 20px;
+
+}
+
+
+#rotateMessage small {
+
+    display: block;
+
+    margin-top: 15px;
+
+    color: #777;
+}
+
+
+/* ========================================
+   PETITS ECRANS
+======================================== */
+
+@media (max-height: 500px) {
+
+    #joystick {
+
+        width: 150px;
+        height: 150px;
+
+    }
+
+    #joystickKnob {
+
+        width: 65px;
+        height: 65px;
+
+        margin-left: -32.5px;
+        margin-top: -32.5px;
+
+    }
+
+    #dpad {
+
+        width: 135px;
+        height: 135px;
+
+    }
+
+    .dpadButton {
+
+        width: 45px;
+        height: 45px;
+
+    }
+
+    #up,
+    #down {
+
+        left: 45px;
+
+    }
+
+    #left,
+    #right {
+
+        top: 45px;
+
+    }
+
+    #buttons {
+
+        transform: scale(.8);
+
+        transform-origin: bottom right;
+
+    }
+
+}
+
+</style>
 </head>
 
 
 <body>
 
-<div id="app">
 
-    <header>
+<!-- ========================================
+     CONNEXION
+======================================== -->
 
-        <div class="logo">
-            DualPlay
+<section id="connectScreen">
+
+    <div class="connectBox">
+
+        <h1>🎮 DualPlay</h1>
+
+        <p>Transformez votre téléphone en manette</p>
+
+        <input
+            id="codeInput"
+            type="tel"
+            inputmode="numeric"
+            maxlength="6"
+            autocomplete="off"
+            placeholder="000000"
+        >
+
+        <button id="connectButton">
+            CONNECTER
+        </button>
+
+        <div id="connectMessage"></div>
+
+    </div>
+
+</section>
+
+
+<!-- ========================================
+     MANETTE
+======================================== -->
+
+<section id="controller">
+
+
+    <!-- BARRE DU HAUT -->
+
+    <div id="topBar">
+
+        <button
+            id="select"
+            class="systemButton"
+        >
+            SELECT
+        </button>
+
+        <button
+            id="start"
+            class="systemButton"
+        >
+            START
+        </button>
+
+    </div>
+
+
+    <!-- JEU -->
+
+    <div id="gameSelector">
+
+        <div id="selectedGame">
+            🟦 Pixel Dodge
         </div>
 
-        <div id="connectionStatus">
-            Non connecté
+        <div id="selectorHelp">
+            ◀ ▶ pour choisir • A pour lancer
         </div>
 
-    </header>
+    </div>
 
 
-    <!-- CONNEXION -->
+    <!-- JOYSTICK -->
 
-    <section id="connectScreen">
+    <div id="joystick">
 
-        <div class="connect-box">
+        <div id="joystickKnob"></div>
 
-            <h1>📱 Manette</h1>
-
-            <p>
-                Entrez le code affiché sur le PC.
-            </p>
-
-            <input
-                id="codeInput"
-                type="tel"
-                inputmode="numeric"
-                maxlength="6"
-                placeholder="000000"
-            >
-
-            <button id="connectButton">
-                CONNECTER
-            </button>
-
-            <div id="connectMessage"></div>
-
-        </div>
-
-    </section>
+    </div>
 
 
-    <!-- MANETTE -->
+    <!-- D-PAD -->
 
-    <section id="controller">
+    <div id="dpad">
 
-        <div class="controller-area">
+        <button
+            class="dpadButton"
+            id="up"
+            data-button="up"
+        >
+            ▲
+        </button>
 
+        <button
+            class="dpadButton"
+            id="left"
+            data-button="left"
+        >
+            ◀
+        </button>
 
-            <div class="system-buttons">
+        <button
+            class="dpadButton"
+            id="right"
+            data-button="right"
+        >
+            ▶
+        </button>
 
-                <button id="select">
-                    SELECT
-                </button>
+        <button
+            class="dpadButton"
+            id="down"
+            data-button="down"
+        >
+            ▼
+        </button>
 
-                <button id="start">
-                    START
-                </button>
-
-            </div>
-
-
-            <!-- D-PAD -->
-
-            <div class="dpad">
-
-                <button
-                    id="up"
-                    data-button="up">
-                    ▲
-                </button>
-
-                <button
-                    id="left"
-                    data-button="left">
-                    ◀
-                </button>
-
-                <button
-                    id="right"
-                    data-button="right">
-                    ▶
-                </button>
-
-                <button
-                    id="down"
-                    data-button="down">
-                    ▼
-                </button>
-
-            </div>
+    </div>
 
 
-            <!-- A B X Y -->
+    <!-- A B X Y -->
 
-            <div class="buttons">
+    <div id="buttons">
 
-                <button
-                    class="game-button"
-                    id="buttonY"
-                    data-button="Y">
-                    Y
-                </button>
+        <button
+            class="gameButton"
+            id="buttonY"
+            data-button="Y"
+        >
+            Y
+        </button>
 
-                <button
-                    class="game-button"
-                    id="buttonX"
-                    data-button="X">
-                    X
-                </button>
+        <button
+            class="gameButton"
+            id="buttonX"
+            data-button="X"
+        >
+            X
+        </button>
 
-                <button
-                    class="game-button"
-                    id="buttonB"
-                    data-button="B">
-                    B
-                </button>
+        <button
+            class="gameButton"
+            id="buttonB"
+            data-button="B"
+        >
+            B
+        </button>
 
-                <button
-                    class="game-button"
-                    id="buttonA"
-                    data-button="A">
-                    A
-                </button>
+        <button
+            class="gameButton"
+            id="buttonA"
+            data-button="A"
+        >
+            A
+        </button>
 
-            </div>
+    </div>
 
-        </div>
 
-    </section>
+</section>
+
+
+<!-- ========================================
+     MESSAGE SI TELEPHONE VERTICAL
+======================================== -->
+
+<div id="rotateMessage">
+
+    <div>
+
+        📱↔️
+
+        <br><br>
+
+        Tournez votre téléphone
+        à l'horizontale.
+
+        <small>
+            DualPlay est conçu pour être utilisé
+            en mode paysage.
+        </small>
+
+    </div>
 
 </div>
 
 
 <script
     type="module"
-    src="controller.js">
-</script>
+    src="controller.js"
+></script>
 
 </body>
-
 </html>
