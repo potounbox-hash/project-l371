@@ -4,27 +4,36 @@ import {
     getDatabase,
     ref,
     set,
-    update,
     onValue,
     onDisconnect
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 
 /* =========================================================
-   FIREBASE
+   CONFIGURATION FIREBASE
 ========================================================= */
 
 const firebaseConfig = {
-    databaseURL:
-        "https://project-l371-default-rtdb.europe-west1.firebasedatabase.app"
+    apiKey: "AIzaSyAlUN410WMaCLZU7cjqLDBgZz1DpA2p9po",
+    authDomain: "project-l371.firebaseapp.com",
+    databaseURL: "https://project-l371-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "project-l371",
+    storageBucket: "project-l371.firebasestorage.app",
+    messagingSenderId: "744918953455",
+    appId: "1:744918953455:web:8109247ada892ff5fe1a1a"
 };
-
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
 
 
 /* =========================================================
-   ÉLÉMENTS HTML
+   INITIALISATION FIREBASE
+========================================================= */
+
+const firebaseApp = initializeApp(firebaseConfig);
+const database = getDatabase(firebaseApp);
+
+
+/* =========================================================
+   ÉLÉMENTS DE LA PAGE
 ========================================================= */
 
 const sessionCodeElement =
@@ -56,10 +65,11 @@ const ctx =
 
 
 /* =========================================================
-   ÉTAT DE LA MANETTE
+   ÉTAT DU TÉLÉPHONE
 ========================================================= */
 
 let controller = {
+
     connected: false,
 
     up: false,
@@ -74,53 +84,69 @@ let controller = {
 
     start: false,
     select: false
+
 };
 
 
 /* =========================================================
-   JOUEUR
+   JOUEUR DU JEU DE TEST
 ========================================================= */
 
 const player = {
-    x: 640,
-    y: 360,
+
+    x: canvas.width / 2,
+    y: canvas.height / 2,
+
     size: 45,
+
     speed: 6
+
 };
 
 
 /* =========================================================
-   GÉNÉRATION DU CODE
+   CRÉER UN CODE À 6 CHIFFRES
 ========================================================= */
 
-function generateCode() {
+function generateSessionCode() {
 
     return Math.floor(
-        100000 + Math.random() * 900000
+        100000 +
+        Math.random() * 900000
     ).toString();
 
 }
 
 
 /* =========================================================
-   CRÉATION DE LA SESSION
+   CRÉER UNE SESSION FIREBASE
 ========================================================= */
 
 async function createSession() {
 
-    const code = generateCode();
+    const code =
+        generateSessionCode();
 
-    sessionCodeElement.textContent = code;
 
-    const sessionRef =
-        ref(db, "sessions/" + code);
+    const sessionReference =
+        ref(
+            database,
+            "sessions/" + code
+        );
 
-    await set(sessionRef, {
+
+    sessionCodeElement.textContent =
+        code;
+
+
+    const initialData = {
 
         createdAt: Date.now(),
 
         pc: {
+
             connected: true
+
         },
 
         controller: {
@@ -139,80 +165,124 @@ async function createSession() {
 
             start: false,
             select: false
+
         }
 
-    });
+    };
+
+
+    await set(
+        sessionReference,
+        initialData
+    );
 
 
     /*
        Si le PC ferme la page,
-       Firebase supprimera la session.
+       Firebase supprime automatiquement
+       la session.
     */
 
-    onDisconnect(sessionRef).remove();
+    onDisconnect(
+        sessionReference
+    ).remove();
 
 
-    listenController(code);
+    listenToController(code);
 
 }
 
 
 /* =========================================================
-   ÉCOUTER LE TÉLÉPHONE
+   ÉCOUTER LA MANETTE
 ========================================================= */
 
-function listenController(code) {
+function listenToController(code) {
 
-    const controllerRef =
-        ref(db, "sessions/" + code + "/controller");
+    const controllerReference =
+        ref(
+            database,
+            "sessions/" +
+            code +
+            "/controller"
+        );
 
 
-    onValue(controllerRef, (snapshot) => {
+    onValue(
+        controllerReference,
+        (snapshot) => {
 
-        const data = snapshot.val();
+            const data =
+                snapshot.val();
 
-        if (!data) {
-            return;
+
+            if (!data) {
+
+                return;
+
+            }
+
+
+            controller = {
+
+                connected:
+                    data.connected === true,
+
+                up:
+                    data.up === true,
+
+                down:
+                    data.down === true,
+
+                left:
+                    data.left === true,
+
+                right:
+                    data.right === true,
+
+                A:
+                    data.A === true,
+
+                B:
+                    data.B === true,
+
+                X:
+                    data.X === true,
+
+                Y:
+                    data.Y === true,
+
+                start:
+                    data.start === true,
+
+                select:
+                    data.select === true
+
+            };
+
+
+            updateConnectionInterface();
+
         }
-
-        controller = {
-
-            connected: data.connected === true,
-
-            up: data.up === true,
-            down: data.down === true,
-            left: data.left === true,
-            right: data.right === true,
-
-            A: data.A === true,
-            B: data.B === true,
-            X: data.X === true,
-            Y: data.Y === true,
-
-            start: data.start === true,
-            select: data.select === true
-        };
-
-
-        updateConnectionUI();
-
-    });
+    );
 
 }
 
 
 /* =========================================================
-   INTERFACE CONNEXION
+   METTRE À JOUR L'INTERFACE
 ========================================================= */
 
-function updateConnectionUI() {
+function updateConnectionInterface() {
 
     if (controller.connected) {
 
         statusText.textContent =
             "Téléphone connecté";
 
-        statusDot.classList.add("connected");
+        statusDot.classList.add(
+            "connected"
+        );
 
         connectionMessage.textContent =
             "🎮 Manette connectée !";
@@ -220,19 +290,22 @@ function updateConnectionUI() {
         gameStatus.textContent =
             "🎮 Téléphone connecté";
 
-        /*
-           On cache le menu et on lance le jeu.
-        */
 
-        menu.style.display = "none";
-        gameScreen.style.display = "block";
+        menu.style.display =
+            "none";
+
+        gameScreen.style.display =
+            "block";
+
 
     } else {
 
         statusText.textContent =
             "En attente du téléphone";
 
-        statusDot.classList.remove("connected");
+        statusDot.classList.remove(
+            "connected"
+        );
 
         connectionMessage.textContent =
             "En attente du téléphone...";
@@ -246,75 +319,107 @@ function updateConnectionUI() {
 
 
 /* =========================================================
-   CONTRÔLES DU JOUEUR
+   DÉPLACEMENT DU JOUEUR
 ========================================================= */
 
 function updatePlayer() {
 
     if (controller.left) {
-        player.x -= player.speed;
+
+        player.x -=
+            player.speed;
+
     }
+
 
     if (controller.right) {
-        player.x += player.speed;
+
+        player.x +=
+            player.speed;
+
     }
+
 
     if (controller.up) {
-        player.y -= player.speed;
+
+        player.y -=
+            player.speed;
+
     }
+
 
     if (controller.down) {
-        player.y += player.speed;
+
+        player.y +=
+            player.speed;
+
     }
 
-
-    /*
-       Empêcher le joueur de sortir de l'écran.
-    */
 
     const half =
         player.size / 2;
 
+
+    /*
+       Limites horizontales
+    */
+
     if (player.x < half) {
-        player.x = half;
+
+        player.x =
+            half;
+
     }
 
-    if (player.x > canvas.width - half) {
+
+    if (
+        player.x >
+        canvas.width - half
+    ) {
+
         player.x =
             canvas.width - half;
+
     }
+
+
+    /*
+       Limites verticales
+    */
 
     if (player.y < half) {
-        player.y = half;
+
+        player.y =
+            half;
+
     }
 
-    if (player.y > canvas.height - half) {
+
+    if (
+        player.y >
+        canvas.height - half
+    ) {
+
         player.y =
             canvas.height - half;
+
     }
 
 }
 
 
 /* =========================================================
-   DESSIN
+   DESSINER LE JEU
 ========================================================= */
 
 function drawGame() {
-
-    ctx.clearRect(
-        0,
-        0,
-        canvas.width,
-        canvas.height
-    );
-
 
     /*
        Fond
     */
 
-    ctx.fillStyle = "#101722";
+    ctx.fillStyle =
+        "#101722";
 
     ctx.fillRect(
         0,
@@ -328,9 +433,12 @@ function drawGame() {
        Grille
     */
 
-    ctx.strokeStyle = "#182230";
+    ctx.strokeStyle =
+        "#1b2635";
 
-    ctx.lineWidth = 1;
+    ctx.lineWidth =
+        1;
+
 
     for (
         let x = 0;
@@ -340,7 +448,10 @@ function drawGame() {
 
         ctx.beginPath();
 
-        ctx.moveTo(x, 0);
+        ctx.moveTo(
+            x,
+            0
+        );
 
         ctx.lineTo(
             x,
@@ -360,7 +471,10 @@ function drawGame() {
 
         ctx.beginPath();
 
-        ctx.moveTo(0, y);
+        ctx.moveTo(
+            0,
+            y
+        );
 
         ctx.lineTo(
             canvas.width,
@@ -376,13 +490,16 @@ function drawGame() {
        Joueur
     */
 
-    ctx.fillStyle = "#4d9cff";
+    ctx.fillStyle =
+        "#4d9cff";
 
     ctx.fillRect(
 
-        player.x - player.size / 2,
+        player.x -
+        player.size / 2,
 
-        player.y - player.size / 2,
+        player.y -
+        player.size / 2,
 
         player.size,
 
@@ -392,15 +509,17 @@ function drawGame() {
 
 
     /*
-       Texte
+       Titre
     */
 
-    ctx.fillStyle = "white";
+    ctx.textAlign =
+        "center";
+
+    ctx.fillStyle =
+        "white";
 
     ctx.font =
-        "bold 24px Arial";
-
-    ctx.textAlign = "center";
+        "bold 28px Arial";
 
     ctx.fillText(
         "DUALPLAY",
@@ -409,33 +528,39 @@ function drawGame() {
     );
 
 
+    /*
+       Texte
+    */
+
     ctx.font =
         "16px Arial";
 
-    ctx.fillStyle = "#aaa";
+    ctx.fillStyle =
+        "#999";
 
     ctx.fillText(
-        "Utilisez votre téléphone comme manette",
+        "Téléphone utilisé comme manette",
         canvas.width / 2,
-        70
+        72
     );
 
 
     /*
-       Indication bouton A
+       Bouton A
     */
 
     if (controller.A) {
 
-        ctx.fillStyle = "#ffffff";
+        ctx.fillStyle =
+            "white";
 
         ctx.font =
             "bold 20px Arial";
 
         ctx.fillText(
-            "BOUTON A !",
+            "A",
             player.x,
-            player.y - 45
+            player.y - 35
         );
 
     }
@@ -453,32 +578,51 @@ function gameLoop() {
 
     drawGame();
 
-    requestAnimationFrame(gameLoop);
+    requestAnimationFrame(
+        gameLoop
+    );
 
 }
 
 
 /* =========================================================
-   LANCEMENT
+   DÉMARRAGE
 ========================================================= */
 
-createSession()
-    .then(() => {
+async function start() {
+
+    try {
+
+        statusText.textContent =
+            "Connexion à Firebase...";
+
+
+        await createSession();
+
 
         statusText.textContent =
             "En attente du téléphone";
 
+
         gameLoop();
 
-    })
-    .catch((error) => {
+
+    } catch (error) {
 
         console.error(error);
+
 
         statusText.textContent =
             "Erreur Firebase";
 
+
         connectionMessage.textContent =
+            "Impossible de créer la session : " +
             error.message;
 
-    });
+    }
+
+}
+
+
+start();
