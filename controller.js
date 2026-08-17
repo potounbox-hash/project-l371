@@ -10,55 +10,95 @@ import {
 
 
 /* =========================================================
-   FIREBASE
+   CONFIGURATION FIREBASE
 ========================================================= */
 
 const firebaseConfig = {
 
+    apiKey:
+        "AIzaSyAlUN410WMaCLZU7cjqLDBgZz1DpA2p9po",
+
+    authDomain:
+        "project-l371.firebaseapp.com",
+
     databaseURL:
-        "https://project-l371-default-rtdb.europe-west1.firebasedatabase.app"
+        "https://project-l371-default-rtdb.europe-west1.firebasedatabase.app",
+
+    projectId:
+        "project-l371",
+
+    storageBucket:
+        "project-l371.firebasestorage.app",
+
+    messagingSenderId:
+        "744918953455",
+
+    appId:
+        "1:744918953455:web:8109247ada892ff5fe1a1a"
 
 };
 
-const app =
-    initializeApp(firebaseConfig);
 
-const db =
-    getDatabase(app);
+/* =========================================================
+   INITIALISATION
+========================================================= */
+
+const firebaseApp =
+    initializeApp(
+        firebaseConfig
+    );
+
+const database =
+    getDatabase(
+        firebaseApp
+    );
 
 
 /* =========================================================
-   HTML
+   ÉLÉMENTS HTML
 ========================================================= */
 
 const codeInput =
-    document.getElementById("codeInput");
+    document.getElementById(
+        "codeInput"
+    );
 
 const connectButton =
-    document.getElementById("connectButton");
+    document.getElementById(
+        "connectButton"
+    );
 
 const connectMessage =
-    document.getElementById("connectMessage");
+    document.getElementById(
+        "connectMessage"
+    );
 
 const connectScreen =
-    document.getElementById("connectScreen");
+    document.getElementById(
+        "connectScreen"
+    );
 
 const controllerScreen =
-    document.getElementById("controller");
+    document.getElementById(
+        "controller"
+    );
 
 const connectionStatus =
-    document.getElementById("connectionStatus");
+    document.getElementById(
+        "connectionStatus"
+    );
 
 
 /* =========================================================
-   SESSION
+   SESSION ACTUELLE
 ========================================================= */
 
-let sessionCode = null;
+let sessionCode =
+    null;
 
 
 /* =========================================================
-   ÉTAT MANETTE
+   ÉTAT DE LA MANETTE
 ========================================================= */
 
 const controllerState = {
@@ -82,75 +122,108 @@ const controllerState = {
 
 
 /* =========================================================
-   CONNEXION
+   CONNEXION À UNE SESSION
 ========================================================= */
 
-async function connect() {
+async function connectToSession() {
 
     const code =
         codeInput.value.trim();
 
 
-    if (!/^\d{6}$/.test(code)) {
+    /*
+       Vérification du code
+    */
+
+    if (
+        !/^\d{6}$/.test(code)
+    ) {
 
         connectMessage.textContent =
-            "⚠️ Entrez un code à 6 chiffres.";
+            "⚠️ Le code doit contenir 6 chiffres.";
 
         return;
+
     }
 
 
+    connectButton.disabled =
+        true;
+
     connectMessage.textContent =
-        "Connexion...";
+        "Connexion en cours...";
 
 
     try {
 
-        const sessionRef =
-            ref(db, "sessions/" + code);
-
-        const snapshot =
-            await get(sessionRef);
-
-
-        if (!snapshot.exists()) {
-
-            connectMessage.textContent =
-                "❌ Ce code n'existe pas.";
-
-            return;
-        }
-
-
-        sessionCode = code;
+        const sessionReference =
+            ref(
+                database,
+                "sessions/" +
+                code
+            );
 
 
         /*
-           Signaler que le téléphone est connecté.
+           Vérifier que la session existe
         */
 
-        const controllerRef =
+        const snapshot =
+            await get(
+                sessionReference
+            );
+
+
+        if (
+            !snapshot.exists()
+        ) {
+
+            connectMessage.textContent =
+                "❌ Code incorrect ou session inexistante.";
+
+            connectButton.disabled =
+                false;
+
+            return;
+
+        }
+
+
+        /*
+           Enregistrer la session
+        */
+
+        sessionCode =
+            code;
+
+
+        const controllerReference =
             ref(
-                db,
+                database,
                 "sessions/" +
                 sessionCode +
                 "/controller"
             );
 
 
+        /*
+           Dire à Firebase :
+           "le téléphone est connecté"
+        */
+
         await update(
-            controllerRef,
+            controllerReference,
             controllerState
         );
 
 
         /*
            Si le téléphone ferme la page,
-           il se déconnecte.
+           passer automatiquement à disconnected.
         */
 
         onDisconnect(
-            controllerRef
+            controllerReference
         ).update({
 
             connected: false
@@ -159,7 +232,7 @@ async function connect() {
 
 
         /*
-           Affichage de la manette.
+           Afficher la manette
         */
 
         connectScreen.style.display =
@@ -175,11 +248,18 @@ async function connect() {
 
     } catch (error) {
 
-        console.error(error);
+        console.error(
+            error
+        );
+
 
         connectMessage.textContent =
-            "❌ Erreur : " +
+            "❌ Erreur Firebase : " +
             error.message;
+
+
+        connectButton.disabled =
+            false;
 
     }
 
@@ -187,7 +267,7 @@ async function connect() {
 
 
 /* =========================================================
-   ENVOYER UNE TOUCHE
+   ENVOYER L'ÉTAT D'UN BOUTON
 ========================================================= */
 
 async function sendButton(
@@ -195,18 +275,32 @@ async function sendButton(
     pressed
 ) {
 
+    /*
+       Aucun téléphone connecté
+    */
+
     if (!sessionCode) {
+
         return;
+
     }
 
+
+    /*
+       Mise à jour locale
+    */
 
     controllerState[button] =
         pressed;
 
 
-    const controllerRef =
+    /*
+       Référence Firebase
+    */
+
+    const controllerReference =
         ref(
-            db,
+            database,
             "sessions/" +
             sessionCode +
             "/controller"
@@ -216,16 +310,22 @@ async function sendButton(
     try {
 
         await update(
-            controllerRef,
+
+            controllerReference,
+
             {
-                [button]: pressed
+
+                [button]:
+                    pressed
+
             }
+
         );
 
     } catch (error) {
 
         console.error(
-            "Erreur envoi bouton:",
+            "Erreur lors de l'envoi :",
             error
         );
 
@@ -235,196 +335,266 @@ async function sendButton(
 
 
 /* =========================================================
-   BOUTONS TACTILES
+   CONFIGURATION DES BOUTONS
 ========================================================= */
 
-document
-    .querySelectorAll("[data-button]")
-    .forEach((button) => {
+function setupButton(button) {
 
-        const name =
-            button.dataset.button;
+    const buttonName =
+        button.dataset.button;
 
 
-        /*
-           TOUCH START
-        */
+    /*
+       TOUCH START
+    */
 
-        button.addEventListener(
-            "touchstart",
-            (event) => {
+    button.addEventListener(
 
-                event.preventDefault();
+        "touchstart",
 
-                sendButton(
-                    name,
-                    true
-                );
+        (event) => {
 
-            },
-            { passive: false }
-        );
+            event.preventDefault();
 
+            sendButton(
+                buttonName,
+                true
+            );
 
-        /*
-           TOUCH END
-        */
+        },
 
-        button.addEventListener(
-            "touchend",
-            (event) => {
+        {
+            passive: false
+        }
 
-                event.preventDefault();
-
-                sendButton(
-                    name,
-                    false
-                );
-
-            },
-            { passive: false }
-        );
+    );
 
 
-        /*
-           TOUCH CANCEL
-        */
+    /*
+       TOUCH END
+    */
 
-        button.addEventListener(
-            "touchcancel",
-            (event) => {
+    button.addEventListener(
 
-                event.preventDefault();
+        "touchend",
 
-                sendButton(
-                    name,
-                    false
-                );
+        (event) => {
 
-            },
-            { passive: false }
-        );
+            event.preventDefault();
 
+            sendButton(
+                buttonName,
+                false
+            );
 
-        /*
-           Compatibilité souris
-        */
+        },
 
-        button.addEventListener(
-            "mousedown",
-            () => {
+        {
+            passive: false
+        }
 
-                sendButton(
-                    name,
-                    true
-                );
-
-            }
-        );
+    );
 
 
-        button.addEventListener(
-            "mouseup",
-            () => {
+    /*
+       TOUCH CANCEL
+    */
 
-                sendButton(
-                    name,
-                    false
-                );
+    button.addEventListener(
 
-            }
-        );
+        "touchcancel",
+
+        (event) => {
+
+            event.preventDefault();
+
+            sendButton(
+                buttonName,
+                false
+            );
+
+        },
+
+        {
+            passive: false
+        }
+
+    );
 
 
-        button.addEventListener(
-            "mouseleave",
-            () => {
+    /*
+       Souris / PC
+    */
 
-                sendButton(
-                    name,
-                    false
-                );
+    button.addEventListener(
 
-            }
-        );
+        "mousedown",
 
-    });
+        () => {
+
+            sendButton(
+                buttonName,
+                true
+            );
+
+        }
+
+    );
+
+
+    button.addEventListener(
+
+        "mouseup",
+
+        () => {
+
+            sendButton(
+                buttonName,
+                false
+            );
+
+        }
+
+    );
+
+
+    button.addEventListener(
+
+        "mouseleave",
+
+        () => {
+
+            sendButton(
+                buttonName,
+                false
+            );
+
+        }
+
+    );
+
+}
 
 
 /* =========================================================
-   START / SELECT
+   INSTALLER LES BOUTONS
 ========================================================= */
 
 document
-    .getElementById("start")
-    .addEventListener(
-        "touchstart",
-        (event) => {
-
-            event.preventDefault();
-
-            sendButton(
-                "start",
-                true
-            );
-
-        },
-        { passive: false }
+    .querySelectorAll(
+        "[data-button]"
+    )
+    .forEach(
+        setupButton
     );
 
 
-document
-    .getElementById("start")
-    .addEventListener(
-        "touchend",
-        (event) => {
+/* =========================================================
+   BOUTON START
+========================================================= */
 
-            event.preventDefault();
-
-            sendButton(
-                "start",
-                false
-            );
-
-        },
-        { passive: false }
+const startButton =
+    document.getElementById(
+        "start"
     );
 
 
-document
-    .getElementById("select")
-    .addEventListener(
-        "touchstart",
-        (event) => {
+startButton.addEventListener(
 
-            event.preventDefault();
+    "touchstart",
 
-            sendButton(
-                "select",
-                true
-            );
+    (event) => {
 
-        },
-        { passive: false }
+        event.preventDefault();
+
+        sendButton(
+            "start",
+            true
+        );
+
+    },
+
+    {
+        passive: false
+    }
+
+);
+
+
+startButton.addEventListener(
+
+    "touchend",
+
+    (event) => {
+
+        event.preventDefault();
+
+        sendButton(
+            "start",
+            false
+        );
+
+    },
+
+    {
+        passive: false
+    }
+
+);
+
+
+/* =========================================================
+   BOUTON SELECT
+========================================================= */
+
+const selectButton =
+    document.getElementById(
+        "select"
     );
 
 
-document
-    .getElementById("select")
-    .addEventListener(
-        "touchend",
-        (event) => {
+selectButton.addEventListener(
 
-            event.preventDefault();
+    "touchstart",
 
-            sendButton(
-                "select",
-                false
-            );
+    (event) => {
 
-        },
-        { passive: false }
-    );
+        event.preventDefault();
+
+        sendButton(
+            "select",
+            true
+        );
+
+    },
+
+    {
+        passive: false
+    }
+
+);
+
+
+selectButton.addEventListener(
+
+    "touchend",
+
+    (event) => {
+
+        event.preventDefault();
+
+        sendButton(
+            "select",
+            false
+        );
+
+    },
+
+    {
+        passive: false
+    }
+
+);
 
 
 /* =========================================================
@@ -433,23 +603,28 @@ document
 
 connectButton.addEventListener(
     "click",
-    connect
+    connectToSession
 );
 
 
-/*
-   Permettre d'appuyer sur Entrée
-*/
+/* =========================================================
+   TOUCHE ENTRÉE
+========================================================= */
 
 codeInput.addEventListener(
+
     "keydown",
+
     (event) => {
 
-        if (event.key === "Enter") {
+        if (
+            event.key === "Enter"
+        ) {
 
-            connect();
+            connectToSession();
 
         }
 
     }
+
 );
