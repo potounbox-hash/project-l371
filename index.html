@@ -5,10 +5,8 @@
 
 <meta charset="UTF-8">
 
-<meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
->
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
 
 <title>DualPlay</title>
 
@@ -20,9 +18,11 @@
 
 html,
 body {
+
     margin: 0;
     width: 100%;
     height: 100%;
+
     overflow: hidden;
 
     font-family:
@@ -30,42 +30,30 @@ body {
         Helvetica,
         sans-serif;
 
-    background: #f3f4f6;
+    background: #f4f4f4;
     color: #111;
 }
-
-
-/* =====================================================
-   HEADER
-===================================================== */
 
 header {
 
     height: 64px;
 
     display: flex;
+
     align-items: center;
     justify-content: space-between;
 
-    padding: 0 28px;
+    padding: 0 25px;
 
-    background: rgba(255,255,255,.95);
+    background: white;
 
-    border-bottom:
-        1px solid #ddd;
-
-    position: relative;
-    z-index: 10;
-
+    border-bottom: 1px solid #ddd;
 }
 
 .logo {
 
     font-size: 25px;
     font-weight: 800;
-
-    letter-spacing: -.5px;
-
 }
 
 .connection {
@@ -75,10 +63,9 @@ header {
 
     gap: 9px;
 
-    font-size: 13px;
-
     color: #777;
 
+    font-size: 14px;
 }
 
 .dot {
@@ -89,72 +76,24 @@ header {
     border-radius: 50%;
 
     background: #aaa;
-
-    transition:
-        background .25s,
-        box-shadow .25s;
-
 }
 
 .dot.connected {
 
-    background: #22c55e;
+    background: #20c66a;
 
     box-shadow:
-        0 0 12px
-        rgba(34,197,94,.7);
-
+        0 0 12px rgba(32,198,106,.6);
 }
 
 
 /* =====================================================
-   BOUTON SON PC
-===================================================== */
-
-#soundButton {
-
-    position: fixed;
-
-    right: 22px;
-    bottom: 22px;
-
-    z-index: 100;
-
-    border: none;
-
-    padding:
-        12px 18px;
-
-    border-radius: 14px;
-
-    background: #111;
-    color: white;
-
-    font-weight: bold;
-
-    cursor: pointer;
-
-    box-shadow:
-        0 8px 25px
-        rgba(0,0,0,.2);
-
-}
-
-#soundButton.enabled {
-
-    background: #16a34a;
-
-}
-
-
-/* =====================================================
-   ÉCRAN CONNEXION
+   CONNEXION
 ===================================================== */
 
 #connectionScreen {
 
-    height:
-        calc(100vh - 64px);
+    height: calc(100vh - 64px);
 
     display: flex;
 
@@ -167,7 +106,6 @@ header {
             #ffffff,
             #eeeeee
         );
-
 }
 
 .connectionBox {
@@ -175,53 +113,39 @@ header {
     text-align: center;
 
     width: 650px;
-
     max-width: 90%;
-
 }
 
 .connectionBox h1 {
 
     margin: 0;
 
-    font-size: 72px;
+    font-size: 65px;
 
-    letter-spacing: -4px;
-
+    letter-spacing: -3px;
 }
 
 .connectionBox p {
 
-    margin-top: 8px;
-
     color: #777;
 
     font-size: 18px;
-
 }
 
 .code {
 
-    margin:
-        38px 0 20px;
+    margin: 35px 0;
 
-    font-size: 64px;
+    font-size: 55px;
 
     font-weight: 900;
 
     letter-spacing: 14px;
-
-    font-variant-numeric:
-        tabular-nums;
-
 }
 
 .connectionText {
 
     color: #777;
-
-    font-size: 15px;
-
 }
 
 
@@ -233,9 +157,7 @@ header {
 
     display: none;
 
-    width: 100%;
-    height:
-        calc(100vh - 64px);
+    height: calc(100vh - 64px);
 
     flex-direction: column;
 
@@ -244,47 +166,32 @@ header {
     justify-content: center;
 
     padding: 30px;
-
-    background:
-        linear-gradient(
-            135deg,
-            #f8fafc,
-            #e9eef5
-        );
-
 }
 
 .menuTitle {
 
-    margin:
-        0 0 8px;
+    margin: 0;
 
     font-size: 42px;
-
 }
 
 .menuSubtitle {
 
-    margin-bottom: 32px;
+    color: #888;
 
-    color: #777;
-
+    margin-top: 8px;
+    margin-bottom: 35px;
 }
-
-
-/* =====================================================
-   JEUX
-===================================================== */
 
 .games {
 
-    display: grid;
-
-    grid-template-columns:
-        repeat(3, 250px);
+    display: flex;
 
     gap: 25px;
 
+    justify-content: center;
+
+    align-items: stretch;
 }
 
 .gameCard {
@@ -292,10 +199,9 @@ header {
     width: 250px;
     height: 280px;
 
-    border:
-        3px solid transparent;
+    border-radius: 24px;
 
-    border-radius: 25px;
+    border: 4px solid #ddd;
 
     background: white;
 
@@ -303,82 +209,46 @@ header {
 
     flex-direction: column;
 
-    align-items: center;
-
     justify-content: center;
+    align-items: center;
 
     user-select: none;
 
     transition:
-        transform .22s,
-        border-color .22s,
-        box-shadow .22s,
-        background .22s;
-
+        transform .25s ease,
+        border-color .25s ease,
+        box-shadow .25s ease,
+        opacity .25s ease;
 }
 
 
 /*
- IMPORTANT :
-
- Les cartes ne possèdent PAS
- de cursor:pointer.
-
- Elles ne réagissent donc
- pas à la souris.
+   IMPORTANT :
+   aucune interaction souris.
 */
+
+.gameCard {
+
+    pointer-events: none;
+}
 
 .gameCard.selected {
 
     border-color: #111;
 
     transform:
-        translateY(-8px)
-        scale(1.04);
+        scale(1.07)
+        translateY(-7px);
 
     box-shadow:
-        0 20px 50px
-        rgba(0,0,0,.18);
-
-    background:
-        linear-gradient(
-            145deg,
-            #ffffff,
-            #f1f5f9
-        );
-
+        0 20px 50px rgba(0,0,0,.18);
 }
 
 .gameIcon {
 
-    font-size: 78px;
+    font-size: 80px;
 
     margin-bottom: 18px;
-
-    animation:
-        floating 2s
-        ease-in-out
-        infinite;
-
-}
-
-@keyframes floating {
-
-    0%,
-    100% {
-
-        transform:
-            translateY(0);
-
-    }
-
-    50% {
-
-        transform:
-            translateY(-8px);
-
-    }
-
 }
 
 .gameName {
@@ -386,7 +256,6 @@ header {
     font-size: 23px;
 
     font-weight: 800;
-
 }
 
 .gameDescription {
@@ -398,19 +267,17 @@ header {
     font-size: 13px;
 
     text-align: center;
-
-    padding: 0 18px;
-
 }
 
 .menuHelp {
 
-    margin-top: 32px;
+    margin-top: 35px;
 
     color: #888;
 
     font-size: 14px;
 
+    text-align: center;
 }
 
 
@@ -422,42 +289,35 @@ header {
 
     display: none;
 
-    position: relative;
+    height: calc(100vh - 64px);
 
-    width: 100%;
-    height:
-        calc(100vh - 64px);
+    position: relative;
 
     align-items: center;
     justify-content: center;
 
-    background:
-        #101722;
-
+    background: #101722;
 }
 
 #gameCanvas {
 
-    width:
-        min(1000px, 90vw);
-
-    height: auto;
+    width: min(1000px, 90vw);
 
     aspect-ratio: 16 / 9;
+
+    background: #101722;
 
     border-radius: 20px;
 
     box-shadow:
-        0 25px 70px
-        rgba(0,0,0,.4);
-
+        0 20px 60px rgba(0,0,0,.45);
 }
 
 .gameTopBar {
 
     position: absolute;
 
-    top: 18px;
+    top: 16px;
 
     left: 50%;
 
@@ -466,10 +326,11 @@ header {
 
     color: white;
 
-    font-size: 20px;
+    font-size: 18px;
 
     font-weight: bold;
 
+    z-index: 5;
 }
 
 #gameHint {
@@ -483,10 +344,34 @@ header {
     transform:
         translateX(-50%);
 
-    color: #888;
+    color: #777;
 
     font-size: 13px;
+}
 
+
+/* =====================================================
+   PETIT INDICATEUR
+===================================================== */
+
+#soundNotice {
+
+    position: fixed;
+
+    bottom: 15px;
+    right: 15px;
+
+    padding: 9px 14px;
+
+    border-radius: 12px;
+
+    background: rgba(0,0,0,.75);
+
+    color: white;
+
+    font-size: 12px;
+
+    opacity: .7;
 }
 
 
@@ -498,57 +383,9 @@ header {
 
     .games {
 
-        grid-template-columns:
-            repeat(2, 220px);
-
+        transform:
+            scale(.8);
     }
-
-    .gameCard {
-
-        width: 220px;
-
-    }
-
-}
-
-@media(max-width: 600px) {
-
-    .games {
-
-        grid-template-columns:
-            1fr;
-
-    }
-
-    .gameCard {
-
-        width: 250px;
-        height: 180px;
-
-    }
-
-    .gameIcon {
-
-        font-size: 50px;
-
-        margin-bottom: 8px;
-
-    }
-
-    .connectionBox h1 {
-
-        font-size: 52px;
-
-    }
-
-    .code {
-
-        font-size: 42px;
-
-        letter-spacing: 8px;
-
-    }
-
 }
 
 </style>
@@ -572,9 +409,8 @@ header {
             class="dot">
         </span>
 
-        <span
-            id="connectionStatus">
-            Connexion...
+        <span id="connectionStatus">
+            En attente
         </span>
 
     </div>
@@ -595,7 +431,7 @@ header {
         </h1>
 
         <p>
-            Scannez le code avec votre GamePad
+            Connectez votre téléphone comme GamePad
         </p>
 
         <div
@@ -608,7 +444,7 @@ header {
             id="connectionText"
             class="connectionText">
 
-            Création de la session...
+            En attente du téléphone...
 
         </div>
 
@@ -618,7 +454,7 @@ header {
 
 
 <!-- =====================================================
-     MENU
+     MENU PRINCIPAL
 ===================================================== -->
 
 <section id="mainMenu">
@@ -628,7 +464,7 @@ header {
     </h1>
 
     <div class="menuSubtitle">
-        Utilisez uniquement le GamePad pour naviguer
+        Utilisez le GamePad pour naviguer
     </div>
 
 
@@ -637,7 +473,7 @@ header {
 
         <div
             class="gameCard selected"
-            data-game="snake">
+            id="game-snake">
 
             <div class="gameIcon">
                 🐍
@@ -656,7 +492,7 @@ header {
 
         <div
             class="gameCard"
-            data-game="pong">
+            id="game-pong">
 
             <div class="gameIcon">
                 🏓
@@ -667,7 +503,7 @@ header {
             </div>
 
             <div class="gameDescription">
-                Affrontez l'ordinateur.
+                Battez l'ordinateur.
             </div>
 
         </div>
@@ -675,7 +511,7 @@ header {
 
         <div
             class="gameCard"
-            data-game="dodge">
+            id="game-dodge">
 
             <div class="gameIcon">
                 🟦
@@ -697,9 +533,9 @@ header {
 
     <div class="menuHelp">
 
-        ← → Choisir
+        ◀ ▶ Choisir
         &nbsp; • &nbsp;
-        A Lancer
+        A / START Lancer
         &nbsp; • &nbsp;
         B Retour
 
@@ -732,20 +568,16 @@ header {
 
     <div id="gameHint">
 
-        B / HOME / SELECT :
-        revenir au menu
+        B / HOME : revenir au menu
 
     </div>
 
 </section>
 
 
-<button
-    id="soundButton">
-
-    🔊 Activer le son
-
-</button>
+<div id="soundNotice">
+    🎵 Audio PC prêt
+</div>
 
 
 <script
