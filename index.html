@@ -1,58 +1,1024 @@
-<script type="module">
+<!DOCTYPE html>
+<html lang="fr">
 
-const startupScreen =
-    document.getElementById("startupScreen");
+<head>
 
-const site =
-    document.getElementById("site");
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>DualPlay</title>
+
+
+<style>
+
+/* =====================================================
+   BASE
+===================================================== */
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+
+    margin: 0;
+
+    width: 100%;
+    height: 100%;
+
+    overflow: hidden;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    background: #000;
+
+    color: #111;
+
+}
+
+button {
+
+    font-family: inherit;
+
+}
+
+
+/* =====================================================
+   ÉCRAN DE DÉMARRAGE
+===================================================== */
+
+#startupScreen {
+
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 99999;
+
+    background: #000;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    opacity: 1;
+
+    transition:
+
+        background-color 4s
+        cubic-bezier(.16,1,.3,1),
+
+        opacity 0.9s
+        ease;
+
+}
+
+
+/* =====================================================
+   LOGO DE DÉMARRAGE
+===================================================== */
+
+#startupLogo {
+
+    width:
+        min(430px, 65vw);
+
+    height: auto;
+
+    opacity: 0;
+
+    transform:
+        scale(.70);
+
+    filter:
+        blur(4px);
+
+    transition:
+
+        opacity 4s
+        cubic-bezier(.16,1,.3,1),
+
+        transform 4s
+        cubic-bezier(.16,1,.3,1),
+
+        filter 4s
+        cubic-bezier(.16,1,.3,1);
+
+}
+
+
+/* =====================================================
+   LANCEMENT DU LOGO
+===================================================== */
+
+#startupScreen.show {
+
+    background: #fff;
+
+}
+
+
+#startupScreen.show #startupLogo {
+
+    opacity: 1;
+
+    transform:
+        scale(1);
+
+    filter:
+        blur(0);
+
+}
+
+
+/* =====================================================
+   DISPARITION
+===================================================== */
+
+#startupScreen.hide {
+
+    opacity: 0;
+
+    pointer-events: none;
+
+}
+
+
+/* =====================================================
+   SITE PRINCIPAL
+===================================================== */
+
+#site {
+
+    width: 100%;
+    height: 100%;
+
+    opacity: 0;
+
+    transition:
+        opacity 1s ease;
+
+}
+
+
+#site.visible {
+
+    opacity: 1;
+
+}
+
+
+/* =====================================================
+   HEADER
+===================================================== */
+
+header {
+
+    height: 64px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding: 0 25px;
+
+    background: #fff;
+
+    border-bottom:
+        1px solid #ddd;
+
+}
+
+.logo {
+
+    font-size: 24px;
+
+    font-weight: bold;
+
+}
+
+.connection {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    color: #777;
+
+    font-size: 13px;
+
+}
+
+.dot {
+
+    width: 10px;
+
+    height: 10px;
+
+    border-radius: 50%;
+
+    background: #aaa;
+
+}
+
+.dot.connected {
+
+    background: #25c46a;
+
+}
+
+
+/* =====================================================
+   ÉCRAN DE CONNEXION
+===================================================== */
+
+#connectionScreen {
+
+    height:
+        calc(100vh - 64px);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    background: #fff;
+
+}
+
+.connectionBox {
+
+    text-align: center;
+
+    width: 600px;
+
+    max-width: 90%;
+
+}
+
+.connectionBox h1 {
+
+    font-size: 58px;
+
+    margin: 0;
+
+}
+
+.connectionBox p {
+
+    color: #777;
+
+}
+
+.code {
+
+    margin: 35px 0;
+
+    font-size: 52px;
+
+    font-weight: bold;
+
+    letter-spacing: 12px;
+
+}
+
+.connectionText {
+
+    color: #777;
+
+}
+
+
+/* =====================================================
+   MENU PRINCIPAL
+===================================================== */
+
+#mainMenu {
+
+    display: none;
+
+    height:
+        calc(100vh - 64px);
+
+    flex-direction: column;
+
+    align-items: center;
+
+    padding: 35px;
+
+    background: #fff;
+
+}
+
+.menuTitle {
+
+    font-size: 40px;
+
+    margin:
+        5px 0 10px;
+
+}
+
+.menuSubtitle {
+
+    color: #777;
+
+    margin-bottom: 30px;
+
+}
+
+
+/* =====================================================
+   LISTE DES JEUX
+===================================================== */
+
+.games {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, 250px);
+
+    gap: 25px;
+
+    justify-content: center;
+
+}
 
 
 /*
-    0 → 1 seconde
-    Écran noir
+   Les cartes ne sont PAS cliquables.
+
+   Le téléphone est la seule manette.
+*/
+
+.gameCard {
+
+    height: 270px;
+
+    border:
+        3px solid #ddd;
+
+    border-radius: 22px;
+
+    background: #fff;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+    cursor: default;
+
+    pointer-events: none;
+
+    transition:
+
+        transform .25s ease,
+
+        border-color .25s ease,
+
+        box-shadow .25s ease;
+
+}
+
+
+/* =====================================================
+   JEU SÉLECTIONNÉ
+===================================================== */
+
+.gameCard.selected {
+
+    border-color: #111;
+
+    transform:
+        translateY(-8px)
+        scale(1.04);
+
+    box-shadow:
+        0 20px 45px
+        rgba(0,0,0,.18);
+
+}
+
+
+/* =====================================================
+   ICÔNE
+===================================================== */
+
+.gameIcon {
+
+    font-size: 75px;
+
+    margin-bottom: 18px;
+
+    animation:
+        floating 2s
+        infinite
+        ease-in-out;
+
+}
+
+@keyframes floating {
+
+    0%,
+    100% {
+
+        transform:
+            translateY(0);
+
+    }
+
+    50% {
+
+        transform:
+            translateY(-8px);
+
+    }
+
+}
+
+.gameName {
+
+    font-size: 21px;
+
+    font-weight: bold;
+
+}
+
+.gameDescription {
+
+    color: #888;
+
+    font-size: 13px;
+
+    margin-top: 7px;
+
+    text-align: center;
+
+    padding: 0 15px;
+
+}
+
+
+/* =====================================================
+   AIDE
+===================================================== */
+
+.menuHelp {
+
+    margin-top: 30px;
+
+    color: #888;
+
+    font-size: 14px;
+
+}
+
+
+/* =====================================================
+   ÉCRAN DE JEU
+===================================================== */
+
+#gameScreen {
+
+    display: none;
+
+    position: relative;
+
+    height:
+        calc(100vh - 64px);
+
+    align-items: center;
+
+    justify-content: center;
+
+    background: #101722;
+
+}
+
+#gameCanvas {
+
+    width:
+        min(1000px, 90vw);
+
+    height: auto;
+
+    aspect-ratio:
+        16 / 9;
+
+    background: #101722;
+
+    border-radius: 20px;
+
+    box-shadow:
+        0 20px 60px
+        rgba(0,0,0,.35);
+
+}
+
+.gameTopBar {
+
+    position: absolute;
+
+    top: 15px;
+
+    left: 50%;
+
+    transform:
+        translateX(-50%);
+
+    color: #fff;
+
+    font-weight: bold;
+
+    font-size: 18px;
+
+}
+
+#gameHint {
+
+    position: absolute;
+
+    bottom: 20px;
+
+    left: 50%;
+
+    transform:
+        translateX(-50%);
+
+    color: #888;
+
+    font-size: 13px;
+
+}
+
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media(max-width: 950px) {
+
+    .games {
+
+        grid-template-columns:
+            repeat(2, 220px);
+
+    }
+
+}
+
+
+@media(max-width: 600px) {
+
+    .games {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+}
+
+
+/* =====================================================
+   ACCESSIBILITÉ
+===================================================== */
+
+@media(prefers-reduced-motion: reduce) {
+
+    #startupScreen,
+    #startupLogo,
+    #site {
+
+        transition: none;
+
+    }
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+     INTRO DUALPLAY
+===================================================== -->
+
+<div id="startupScreen">
+
+    <img
+        id="startupLogo"
+        src="logo.png"
+        alt="DualPlay"
+    >
+
+</div>
+
+
+
+<!-- =====================================================
+     SITE
+===================================================== -->
+
+<div id="site">
+
+
+<!-- =====================================================
+     HEADER
+===================================================== -->
+
+<header>
+
+    <div class="logo">
+
+        DualPlay
+
+    </div>
+
+
+    <div class="connection">
+
+        <span
+            id="connectionDot"
+            class="dot">
+        </span>
+
+
+        <span
+            id="connectionStatus">
+
+            En attente
+
+        </span>
+
+    </div>
+
+</header>
+
+
+
+<!-- =====================================================
+     CONNEXION
+===================================================== -->
+
+<section
+    id="connectionScreen">
+
+    <div class="connectionBox">
+
+
+        <h1>
+
+            DualPlay
+
+        </h1>
+
+
+        <p>
+
+            Connectez votre GamePad
+
+        </p>
+
+
+        <div
+            id="sessionCode"
+            class="code">
+
+            ------
+
+        </div>
+
+
+        <div
+            id="connectionText"
+            class="connectionText">
+
+            En attente du téléphone...
+
+        </div>
+
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     MENU PRINCIPAL
+===================================================== -->
+
+<section
+    id="mainMenu">
+
+
+    <h1
+        class="menuTitle">
+
+        Choisissez un jeu
+
+    </h1>
+
+
+    <div
+        class="menuSubtitle">
+
+        Utilisez le GamePad pour naviguer
+
+    </div>
+
+
+
+    <div class="games">
+
+
+        <!-- SNAKE -->
+
+        <div
+            class="gameCard"
+            data-game="snake">
+
+
+            <div class="gameIcon">
+
+                🐍
+
+            </div>
+
+
+            <div class="gameName">
+
+                Snake
+
+            </div>
+
+
+            <div
+                class="gameDescription">
+
+                Faites grandir votre serpent.
+
+            </div>
+
+
+        </div>
+
+
+
+        <!-- PONG -->
+
+        <div
+            class="gameCard"
+            data-game="pong">
+
+
+            <div class="gameIcon">
+
+                🏓
+
+            </div>
+
+
+            <div class="gameName">
+
+                Pong
+
+            </div>
+
+
+            <div
+                class="gameDescription">
+
+                Affrontez l'ordinateur.
+
+            </div>
+
+
+        </div>
+
+
+
+        <!-- DODGE -->
+
+        <div
+            class="gameCard"
+            data-game="dodge">
+
+
+            <div class="gameIcon">
+
+                🟦
+
+            </div>
+
+
+            <div class="gameName">
+
+                Pixel Dodge
+
+            </div>
+
+
+            <div
+                class="gameDescription">
+
+                Évitez les obstacles.
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+
+    <div class="menuHelp">
+
+        ◀ ▶ Sélectionner
+
+        &nbsp; • &nbsp;
+
+        A Lancer
+
+        &nbsp; • &nbsp;
+
+        B Retour
+
+    </div>
+
+
+</section>
+
+
+
+<!-- =====================================================
+     JEU
+===================================================== -->
+
+<section
+    id="gameScreen">
+
+
+    <div
+        class="gameTopBar">
+
+        <span
+            id="gameTitle">
+
+            DualPlay
+
+        </span>
+
+    </div>
+
+
+    <canvas
+        id="gameCanvas"
+        width="1000"
+        height="562">
+    </canvas>
+
+
+    <div
+        id="gameHint">
+
+        B ou SELECT : revenir au menu
+
+    </div>
+
+
+</section>
+
+
+</div>
+
+
+
+<!-- =====================================================
+     ANIMATION DE DÉMARRAGE
+===================================================== -->
+
+<script>
+
+/*
+=========================================================
+   TIMELINE
+=========================================================
+
+   0.0 s
+   ↓
+   Écran noir
+
+   1.0 s
+   ↓
+   Fond blanc + logo commencent leur apparition
+
+   1 → 5 s
+   ↓
+   Fondu + zoom professionnel du logo
+
+   5.0 s
+   ↓
+   Le site apparaît
+
+   5.9 s
+   ↓
+   L'intro disparaît complètement
+=========================================================
 */
 
 
+const startupScreen =
+    document.getElementById(
+        "startupScreen"
+    );
+
+
+const site =
+    document.getElementById(
+        "site"
+    );
+
+
+
 /*
-    À 1 seconde :
-    le fond blanc et le logo
-    apparaissent ensemble.
+=========================================================
+   1 SECONDE DE NOIR
+=========================================================
 */
 
 setTimeout(() => {
 
-    startupScreen.classList.add("show");
+    startupScreen.classList.add(
+        "show"
+    );
 
 }, 1000);
 
 
+
 /*
-    À 5,2 secondes :
-    le site commence à apparaître.
+=========================================================
+   LE SITE COMMENCE À APPARAÎTRE
+=========================================================
 */
 
 setTimeout(() => {
 
-    site.classList.add("visible");
+    site.classList.add(
+        "visible"
+    );
 
-}, 5200);
+}, 5000);
+
 
 
 /*
-    À 6,5 secondes :
-    on retire l'écran de démarrage.
+=========================================================
+   DISPARITION DE L'INTRO
+=========================================================
 */
 
 setTimeout(() => {
 
-    startupScreen.classList.add("hide");
+    startupScreen.classList.add(
+        "hide"
+    );
 
-}, 6500);
+}, 5900);
+
 
 
 /*
-    Une fois le fondu terminé,
-    on supprime l'écran de démarrage.
+=========================================================
+   SUPPRESSION DE L'ÉCRAN
+=========================================================
 */
 
 startupScreen.addEventListener(
@@ -60,11 +1026,20 @@ startupScreen.addEventListener(
     event => {
 
         if (
-            event.propertyName === "opacity" &&
-            startupScreen.classList.contains("hide")
+
+            event.propertyName ===
+            "opacity"
+
+            &&
+
+            startupScreen.classList.contains(
+                "hide"
+            )
+
         ) {
 
-            startupScreen.style.display = "none";
+            startupScreen.style.display =
+                "none";
 
         }
 
@@ -72,3 +1047,19 @@ startupScreen.addEventListener(
 );
 
 </script>
+
+
+
+<!-- =====================================================
+     FIREBASE / APP
+===================================================== -->
+
+<script
+    type="module"
+    src="app.js">
+</script>
+
+
+</body>
+
+</html>
