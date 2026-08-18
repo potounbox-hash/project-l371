@@ -6,15 +6,15 @@ import {
     ref,
     get,
     update,
-    onDisconnect,
-    onValue
+    onValue,
+    onDisconnect
 }
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 
-/* ========================================
+/* =====================================================
    FIREBASE
-======================================== */
+===================================================== */
 
 const firebaseConfig = {
 
@@ -42,25 +42,27 @@ const firebaseConfig = {
 };
 
 
-const firebaseApp =
-    initializeApp(firebaseConfig);
+const app =
+    initializeApp(
+        firebaseConfig
+    );
 
 const database =
-    getDatabase(firebaseApp);
+    getDatabase(app);
 
 
-/* ========================================
+/* =====================================================
    ELEMENTS
-======================================== */
+===================================================== */
 
 const connectScreen =
     document.getElementById(
         "connectScreen"
     );
 
-const controllerScreen =
+const gamepad =
     document.getElementById(
-        "controller"
+        "gamepad"
     );
 
 const codeInput =
@@ -78,25 +80,25 @@ const connectMessage =
         "connectMessage"
     );
 
-const selectedGame =
+const padScreenGame =
     document.getElementById(
-        "selectedGame"
+        "padScreenGame"
     );
 
-const joystick =
+const stick =
     document.getElementById(
-        "joystick"
+        "stick"
     );
 
-const joystickKnob =
+const stickKnob =
     document.getElementById(
-        "joystickKnob"
+        "stickKnob"
     );
 
 
-/* ========================================
+/* =====================================================
    MUSIQUE
-======================================== */
+===================================================== */
 
 const phoneMusic =
     new Audio("phone.mp3");
@@ -106,32 +108,19 @@ phoneMusic.loop = true;
 phoneMusic.volume = 0.35;
 
 
-/*
-   Le navigateur autorise normalement
-   la musique après le clic sur CONNECTER.
-*/
-
-function startMusic() {
-
-    phoneMusic
-        .play()
-        .catch(() => {});
-
-}
-
-
-/* ========================================
+/* =====================================================
    SESSION
-======================================== */
+===================================================== */
 
-let sessionCode = null;
+let sessionCode =
+    null;
 
 
-/* ========================================
-   ETAT MANETTE
-======================================== */
+/* =====================================================
+   ETAT
+===================================================== */
 
-const controllerState = {
+const state = {
 
     connected: true,
 
@@ -151,91 +140,40 @@ const controllerState = {
 };
 
 
-/* ========================================
+/* =====================================================
    JEUX
-======================================== */
+===================================================== */
 
-const games = [
+const games = {
 
-    {
-        id: "dodge",
-        name: "🟦 Pixel Dodge"
-    },
+    snake:
+        "🐍 Snake",
 
-    {
-        id: "snake",
-        name: "🐍 Snake"
-    },
+    pong:
+        "🏓 Pong",
 
-    {
-        id: "pong",
-        name: "🏓 Pong"
-    }
+    dodge:
+        "🟦 Pixel Dodge"
 
-];
+};
 
 
-let selectedIndex = 0;
+/* =====================================================
+   MUSIQUE
+===================================================== */
 
+function startMusic() {
 
-/* ========================================
-   VERIFICATION ORIENTATION
-======================================== */
-
-function checkOrientation() {
-
-    const rotateMessage =
-        document.getElementById(
-            "rotateMessage"
-        );
-
-    if (
-        window.innerWidth <
-        window.innerHeight
-    ) {
-
-        rotateMessage.style.display =
-            "flex";
-
-    }
-    else {
-
-        rotateMessage.style.display =
-            "none";
-
-    }
+    phoneMusic
+        .play()
+        .catch(() => {});
 
 }
 
 
-window.addEventListener(
-    "resize",
-    checkOrientation
-);
-
-window.addEventListener(
-    "orientationchange",
-    checkOrientation
-);
-
-checkOrientation();
-
-
-/* ========================================
-   AFFICHER JEU
-======================================== */
-
-function updateGameDisplay() {
-
-    selectedGame.textContent =
-        games[selectedIndex].name;
-
-}
-
-
-/* ========================================
-   ENVOYER ETAT
-======================================== */
+/* =====================================================
+   ENVOYER BOUTON
+===================================================== */
 
 async function sendButton(
     name,
@@ -246,7 +184,7 @@ async function sendButton(
         return;
 
 
-    controllerState[name] =
+    state[name] =
         value;
 
 
@@ -272,7 +210,6 @@ async function sendButton(
     catch (error) {
 
         console.error(
-            "Firebase:",
             error
         );
 
@@ -281,62 +218,37 @@ async function sendButton(
 }
 
 
-/* ========================================
-   CHANGER DE JEU
-======================================== */
+/* =====================================================
+   ENVOYER COMMANDE
+===================================================== */
 
-async function changeGame(
-    direction
+async function sendCommand(
+    type
 ) {
-
-    selectedIndex += direction;
-
-
-    if (
-        selectedIndex < 0
-    ) {
-
-        selectedIndex =
-            games.length - 1;
-
-    }
-
-
-    if (
-        selectedIndex >= games.length
-    ) {
-
-        selectedIndex = 0;
-
-    }
-
-
-    updateGameDisplay();
-
 
     if (!sessionCode)
         return;
 
 
-    const sessionRef =
-        ref(
-            database,
-            "sessions/" +
-            sessionCode
-        );
-
-
     try {
 
         await update(
-            sessionRef,
+            ref(
+                database,
+                "sessions/" +
+                sessionCode
+            ),
             {
 
-                selectedGame:
-                    games[selectedIndex].id,
+                command: {
 
-                gameStarted:
-                    false
+                    type:
+                        type,
+
+                    timestamp:
+                        Date.now()
+
+                }
 
             }
         );
@@ -344,172 +256,270 @@ async function changeGame(
     }
     catch (error) {
 
-        console.error(error);
+        console.error(
+            error
+        );
 
     }
 
 }
 
 
-/* ========================================
-   BOUTONS DIRECTIONNELS
-======================================== */
+/* =====================================================
+   CHANGER DE JEU
+===================================================== */
 
-function setupButton(
-    element
+async function selectGame(
+    direction
 ) {
 
-    const name =
-        element.dataset.button;
-
-
-    /* TOUCH START */
-
-    element.addEventListener(
-        "touchstart",
-        event => {
-
-            event.preventDefault();
-
-            sendButton(
-                name,
-                true
-            );
-
-        },
-        {
-            passive: false
-        }
-    );
-
-
-    /* TOUCH END */
-
-    element.addEventListener(
-        "touchend",
-        event => {
-
-            event.preventDefault();
-
-            sendButton(
-                name,
-                false
-            );
-
-        },
-        {
-            passive: false
-        }
-    );
-
-
-    /* TOUCH CANCEL */
-
-    element.addEventListener(
-        "touchcancel",
-        event => {
-
-            event.preventDefault();
-
-            sendButton(
-                name,
-                false
-            );
-
-        },
-        {
-            passive: false
-        }
+    await sendCommand(
+        direction > 0
+            ? "selectNext"
+            : "selectPrevious"
     );
 
 }
 
+
+/* =====================================================
+   BOUTONS NORMAUX
+===================================================== */
 
 document
     .querySelectorAll(
         "[data-button]"
     )
     .forEach(
-        setupButton
-    );
+        button => {
+
+            const name =
+                button.dataset.button;
 
 
-/* ========================================
-   START
-======================================== */
+            button.addEventListener(
+                "touchstart",
+                event => {
 
-function setupSystemButton(
-    id,
-    name
-) {
+                    event.preventDefault();
 
-    const button =
-        document.getElementById(id);
+                    sendButton(
+                        name,
+                        true
+                    );
 
-
-    button.addEventListener(
-        "touchstart",
-        event => {
-
-            event.preventDefault();
-
-            sendButton(
-                name,
-                true
+                },
+                {
+                    passive: false
+                }
             );
 
-        },
-        {
-            passive: false
+
+            button.addEventListener(
+                "touchend",
+                event => {
+
+                    event.preventDefault();
+
+                    sendButton(
+                        name,
+                        false
+                    );
+
+                },
+                {
+                    passive: false
+                }
+            );
+
+
+            button.addEventListener(
+                "touchcancel",
+                event => {
+
+                    event.preventDefault();
+
+                    sendButton(
+                        name,
+                        false
+                    );
+
+                },
+                {
+                    passive: false
+                }
+            );
+
         }
     );
 
 
-    button.addEventListener(
-        "touchend",
-        event => {
+/* =====================================================
+   A
+===================================================== */
 
-            event.preventDefault();
-
-            sendButton(
-                name,
-                false
-            );
-
-        },
-        {
-            passive: false
-        }
+const A =
+    document.getElementById(
+        "buttonA"
     );
 
-}
 
+A.addEventListener(
+    "touchstart",
+    event => {
 
-setupSystemButton(
-    "start",
-    "start"
+        event.preventDefault();
+
+        sendButton(
+            "A",
+            true
+        );
+
+        /*
+           Commande séparée :
+           le PC sait immédiatement
+           qu'on veut lancer le jeu.
+        */
+
+        sendCommand(
+            "launch"
+        );
+
+    },
+    {
+        passive: false
+    }
 );
 
-setupSystemButton(
-    "select",
-    "select"
+
+A.addEventListener(
+    "touchend",
+    event => {
+
+        event.preventDefault();
+
+        sendButton(
+            "A",
+            false
+        );
+
+    },
+    {
+        passive: false
+    }
 );
 
 
-/* ========================================
-   JOYSTICK
-======================================== */
+/* =====================================================
+   B
+===================================================== */
 
-let joystickActive = false;
+const B =
+    document.getElementById(
+        "buttonB"
+    );
 
 
-function moveJoystick(
+B.addEventListener(
+    "touchstart",
+    event => {
+
+        event.preventDefault();
+
+        sendButton(
+            "B",
+            true
+        );
+
+        sendCommand(
+            "back"
+        );
+
+    },
+    {
+        passive: false
+    }
+);
+
+
+B.addEventListener(
+    "touchend",
+    event => {
+
+        event.preventDefault();
+
+        sendButton(
+            "B",
+            false
+        );
+
+    },
+    {
+        passive: false
+    }
+);
+
+
+/* =====================================================
+   D-PAD SELECTION
+===================================================== */
+
+const left =
+    document.getElementById(
+        "dpadLeft"
+    );
+
+const right =
+    document.getElementById(
+        "dpadRight"
+    );
+
+
+left.addEventListener(
+    "touchstart",
+    event => {
+
+        event.preventDefault();
+
+        selectGame(-1);
+
+    },
+    {
+        passive: false
+    }
+);
+
+
+right.addEventListener(
+    "touchstart",
+    event => {
+
+        event.preventDefault();
+
+        selectGame(1);
+
+    },
+    {
+        passive: false
+    }
+);
+
+
+/* =====================================================
+   STICK
+===================================================== */
+
+let stickActive =
+    false;
+
+
+function moveStick(
     x,
     y
 ) {
 
     const rect =
-        joystick.getBoundingClientRect();
+        stick.getBoundingClientRect();
 
 
     const centerX =
@@ -529,7 +539,7 @@ function moveJoystick(
 
 
     const maximum =
-        rect.width / 2 - 45;
+        rect.width / 2 - 42;
 
 
     const distance =
@@ -554,60 +564,45 @@ function moveJoystick(
     }
 
 
-    joystickKnob.style.transform =
+    stickKnob.style.transform =
         `translate(${dx}px, ${dy}px)`;
 
 
-    const threshold = 25;
-
-
-    const left =
-        dx < -threshold;
-
-    const right =
-        dx > threshold;
-
-    const up =
-        dy < -threshold;
-
-    const down =
-        dy > threshold;
+    const threshold =
+        25;
 
 
     sendButton(
         "left",
-        left
+        dx < -threshold
     );
 
     sendButton(
         "right",
-        right
+        dx > threshold
     );
 
     sendButton(
         "up",
-        up
+        dy < -threshold
     );
 
     sendButton(
         "down",
-        down
+        dy > threshold
     );
 
 }
 
 
-/* ========================================
-   RESET JOYSTICK
-======================================== */
+function resetStick() {
 
-function resetJoystick() {
-
-    joystickActive = false;
+    stickActive =
+        false;
 
 
-    joystickKnob.style.transform =
-        "translate(0px, 0px)";
+    stickKnob.style.transform =
+        "translate(0,0)";
 
 
     sendButton(
@@ -633,24 +628,24 @@ function resetJoystick() {
 }
 
 
-/* ========================================
-   JOYSTICK TOUCH START
-======================================== */
-
-joystick.addEventListener(
+stick.addEventListener(
     "touchstart",
     event => {
 
         event.preventDefault();
 
-        joystickActive = true;
+        stickActive =
+            true;
+
+
+        startMusic();
 
 
         const touch =
             event.touches[0];
 
 
-        moveJoystick(
+        moveStick(
             touch.clientX,
             touch.clientY
         );
@@ -662,18 +657,14 @@ joystick.addEventListener(
 );
 
 
-/* ========================================
-   JOYSTICK MOVE
-======================================== */
-
-joystick.addEventListener(
+stick.addEventListener(
     "touchmove",
     event => {
 
         event.preventDefault();
 
 
-        if (!joystickActive)
+        if (!stickActive)
             return;
 
 
@@ -681,7 +672,7 @@ joystick.addEventListener(
             event.touches[0];
 
 
-        moveJoystick(
+        moveStick(
             touch.clientX,
             touch.clientY
         );
@@ -693,134 +684,248 @@ joystick.addEventListener(
 );
 
 
-/* ========================================
-   JOYSTICK END
-======================================== */
-
-joystick.addEventListener(
+stick.addEventListener(
     "touchend",
-    event => {
-
-        event.preventDefault();
-
-        resetJoystick();
-
-    },
-    {
-        passive: false
-    }
+    resetStick
 );
 
 
-joystick.addEventListener(
+stick.addEventListener(
     "touchcancel",
-    resetJoystick
+    resetStick
 );
 
 
-/* ========================================
-   SELECTION AVEC D-PAD
-======================================== */
+/* =====================================================
+   START
+===================================================== */
 
-let previousLeft = false;
+document
+    .getElementById(
+        "start"
+    )
+    .addEventListener(
+        "touchstart",
+        event => {
 
-let previousRight = false;
+            event.preventDefault();
 
+            sendButton(
+                "start",
+                true
+            );
 
-setInterval(
-    () => {
+            sendCommand(
+                "launch"
+            );
 
-        if (
-            controllerState.left &&
-            !previousLeft
-        ) {
-
-            changeGame(-1);
-
+        },
+        {
+            passive: false
         }
+    );
 
 
-        if (
-            controllerState.right &&
-            !previousRight
-        ) {
+/* =====================================================
+   SELECT
+===================================================== */
 
-            changeGame(1);
+document
+    .getElementById(
+        "select"
+    )
+    .addEventListener(
+        "touchstart",
+        event => {
 
+            event.preventDefault();
+
+            sendButton(
+                "select",
+                true
+            );
+
+            sendCommand(
+                "back"
+            );
+
+        },
+        {
+            passive: false
         }
+    );
 
 
-        previousLeft =
-            controllerState.left;
+/* =====================================================
+   HOME
+===================================================== */
 
-        previousRight =
-            controllerState.right;
+document
+    .getElementById(
+        "homeButton"
+    )
+    .addEventListener(
+        "touchstart",
+        event => {
 
-    },
-    80
-);
+            event.preventDefault();
+
+            sendCommand(
+                "back"
+            );
+
+        },
+        {
+            passive: false
+        }
+    );
 
 
-/* ========================================
-   A = LANCER
-======================================== */
+/* =====================================================
+   MENU
+===================================================== */
 
-let previousA = false;
+document
+    .getElementById(
+        "menuButton"
+    )
+    .addEventListener(
+        "touchstart",
+        event => {
+
+            event.preventDefault();
+
+            sendCommand(
+                "back"
+            );
+
+        },
+        {
+            passive: false
+        }
+    );
 
 
-setInterval(
-    async () => {
+/* =====================================================
+   QUITTER
+===================================================== */
 
-        if (
-            controllerState.A &&
-            !previousA &&
+document
+    .getElementById(
+        "quitButton"
+    )
+    .addEventListener(
+        "touchstart",
+        async event => {
+
+            event.preventDefault();
+
+            sendCommand(
+                "close"
+            );
+
+
+            await new Promise(
+                resolve =>
+                    setTimeout(
+                        resolve,
+                        200
+                    )
+            );
+
+
+            /*
+               Impossible de fermer
+               directement un onglet
+               que JavaScript n'a pas ouvert.
+
+               On revient donc à l'écran
+               de connexion.
+            */
+
+            gamepad.style.display =
+                "none";
+
+            connectScreen.style.display =
+                "flex";
+
+            connectMessage.textContent =
+                "Session fermée.";
+
+        },
+        {
+            passive: false
+        }
+    );
+
+
+/* =====================================================
+   ECOUTER LE PC
+===================================================== */
+
+function listenSession() {
+
+    const sessionRef =
+        ref(
+            database,
+            "sessions/" +
             sessionCode
-        ) {
-
-            const sessionRef =
-                ref(
-                    database,
-                    "sessions/" +
-                    sessionCode
-                );
+        );
 
 
-            try {
+    onValue(
+        sessionRef,
+        snapshot => {
 
-                await update(
-                    sessionRef,
-                    {
+            const data =
+                snapshot.val();
 
-                        selectedGame:
-                            games[selectedIndex].id,
 
-                        gameStarted:
-                            true
+            if (!data)
+                return;
 
-                    }
-                );
+
+            /* jeu */
+
+            if (
+                data.selectedGame
+            ) {
+
+                padScreenGame.textContent =
+                    games[
+                        data.selectedGame
+                    ] ||
+                    data.selectedGame;
 
             }
-            catch (error) {
 
-                console.error(error);
+
+            /* session fermée */
+
+            if (
+                data.closed === true
+            ) {
+
+                connectScreen.style.display =
+                    "flex";
+
+                gamepad.style.display =
+                    "none";
+
+                connectMessage.textContent =
+                    "La session a été fermée.";
 
             }
 
         }
+    );
+
+}
 
 
-        previousA =
-            controllerState.A;
-
-    },
-    80
-);
-
-
-/* ========================================
-   CONNEXION
-======================================== */
+/* =====================================================
+   CONNECTER
+===================================================== */
 
 async function connect() {
 
@@ -836,7 +941,7 @@ async function connect() {
     ) {
 
         connectMessage.textContent =
-            "⚠️ Entre un code à 6 chiffres.";
+            "⚠️ Le code doit contenir 6 chiffres.";
 
         return;
 
@@ -848,7 +953,7 @@ async function connect() {
 
 
     connectMessage.textContent =
-        "Connexion à la console...";
+        "Connexion...";
 
 
     try {
@@ -872,7 +977,7 @@ async function connect() {
         ) {
 
             connectMessage.textContent =
-                "❌ Cette session n'existe pas.";
+                "❌ Session introuvable.";
 
             connectButton.disabled =
                 false;
@@ -897,7 +1002,7 @@ async function connect() {
 
         await update(
             controllerRef,
-            controllerState
+            state
         );
 
 
@@ -906,7 +1011,8 @@ async function connect() {
         )
         .update({
 
-            connected: false
+            connected:
+                false
 
         });
 
@@ -914,21 +1020,19 @@ async function connect() {
         connectScreen.style.display =
             "none";
 
-
-        controllerScreen.style.display =
+        gamepad.style.display =
             "block";
 
 
-        updateGameDisplay();
-
-
-        listenToSession();
+        listenSession();
 
 
     }
     catch (error) {
 
-        console.error(error);
+        console.error(
+            error
+        );
 
 
         connectMessage.textContent =
@@ -944,76 +1048,15 @@ async function connect() {
 }
 
 
-/* ========================================
-   ECOUTER FIREBASE
-======================================== */
-
-function listenToSession() {
-
-    const sessionRef =
-        ref(
-            database,
-            "sessions/" +
-            sessionCode
-        );
-
-
-    onValue(
-        sessionRef,
-        snapshot => {
-
-            const data =
-                snapshot.val();
-
-
-            if (!data)
-                return;
-
-
-            if (
-                data.selectedGame
-            ) {
-
-                const index =
-                    games.findIndex(
-                        game =>
-                            game.id ===
-                            data.selectedGame
-                    );
-
-
-                if (
-                    index !== -1
-                ) {
-
-                    selectedIndex =
-                        index;
-
-                    updateGameDisplay();
-
-                }
-
-            }
-
-        }
-    );
-
-}
-
-
-/* ========================================
-   BOUTON CONNECTER
-======================================== */
+/* =====================================================
+   BOUTON CONNECTION
+===================================================== */
 
 connectButton.addEventListener(
     "click",
     connect
 );
 
-
-/* ========================================
-   ENTREE CLAVIER
-======================================== */
 
 codeInput.addEventListener(
     "keydown",
@@ -1031,9 +1074,9 @@ codeInput.addEventListener(
 );
 
 
-/* ========================================
-   PREVENTION DU ZOOM / MENU
-======================================== */
+/* =====================================================
+   PAS DE MENU CONTEXTUEL
+===================================================== */
 
 document.addEventListener(
     "contextmenu",
@@ -1043,10 +1086,3 @@ document.addEventListener(
 
     }
 );
-
-
-/* ========================================
-   ORIENTATION INITIALE
-======================================== */
-
-updateGameDisplay();
