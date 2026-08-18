@@ -2,7 +2,6 @@
 <html lang="fr">
 
 <head>
-
 <meta charset="UTF-8">
 
 <meta
@@ -14,9 +13,9 @@
 
 <style>
 
-/* =====================================================
+/* =========================================================
    BASE
-===================================================== */
+========================================================= */
 
 * {
     box-sizing: border-box;
@@ -27,12 +26,9 @@
 
 html,
 body {
-
-    margin: 0;
-
     width: 100%;
     height: 100%;
-
+    margin: 0;
     overflow: hidden;
 
     font-family:
@@ -40,45 +36,38 @@ body {
         Helvetica,
         sans-serif;
 
-    color: white;
-
     touch-action: none;
-
 }
-
-
-/* =====================================================
-   FOND ANIMÉ
-===================================================== */
 
 body {
 
+    color: white;
+
     background:
         linear-gradient(
-            125deg,
-            #171b45,
-            #39276b,
-            #176b78,
-            #233d7a,
-            #531f63
+            120deg,
+            #171d4b,
+            #49276e,
+            #146c79,
+            #273c83,
+            #671e62
         );
 
     background-size: 500% 500%;
 
     animation:
-        backgroundMove 16s ease infinite;
-
+        backgroundAnimation 18s ease infinite;
 }
 
 
-@keyframes backgroundMove {
+@keyframes backgroundAnimation {
 
     0% {
         background-position: 0% 50%;
     }
 
     25% {
-        background-position: 100% 30%;
+        background-position: 100% 25%;
     }
 
     50% {
@@ -92,11 +81,10 @@ body {
     100% {
         background-position: 0% 50%;
     }
-
 }
 
 
-/* lumière ambiante */
+/* lumières */
 
 body::before {
 
@@ -104,44 +92,83 @@ body::before {
 
     position: fixed;
 
-    inset: -30%;
+    width: 70vw;
+    height: 70vw;
 
-    pointer-events: none;
+    left: -20vw;
+    top: -20vw;
+
+    border-radius: 50%;
 
     background:
         radial-gradient(
-            circle at 25% 40%,
-            rgba(90,150,255,.25),
-            transparent 30%
-        ),
-        radial-gradient(
-            circle at 75% 60%,
-            rgba(255,70,190,.22),
-            transparent 30%
+            circle,
+            rgba(80,150,255,.22),
+            transparent 65%
         );
 
-    animation:
-        ambientMove 10s ease-in-out infinite alternate;
+    pointer-events: none;
 
+    animation:
+        lightMove 10s ease-in-out infinite alternate;
 }
 
 
-@keyframes ambientMove {
+body::after {
+
+    content: "";
+
+    position: fixed;
+
+    width: 65vw;
+    height: 65vw;
+
+    right: -20vw;
+    bottom: -20vw;
+
+    border-radius: 50%;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(255,80,200,.20),
+            transparent 65%
+        );
+
+    pointer-events: none;
+
+    animation:
+        lightMove2 12s ease-in-out infinite alternate;
+}
+
+
+@keyframes lightMove {
 
     from {
-        transform: scale(1);
+        transform: translate(0,0);
     }
 
     to {
-        transform: scale(1.25) rotate(8deg);
+        transform: translate(20vw,15vh);
     }
-
 }
 
 
-/* =====================================================
-   ÉCRAN DE CONNEXION
-===================================================== */
+@keyframes lightMove2 {
+
+    from {
+        transform: translate(0,0);
+    }
+
+    to {
+        transform: translate(-15vw,-10vh);
+    }
+}
+
+
+/* =========================================================
+   CONNEXION
+========================================================= */
 
 #connectScreen {
 
@@ -154,39 +181,40 @@ body::before {
     align-items: center;
     justify-content: center;
 
-    z-index: 100;
-
+    z-index: 1000;
 }
 
 
 .connectBox {
 
     width: 420px;
-
     max-width: 90%;
 
     padding: 38px;
 
     text-align: center;
 
-    border-radius: 32px;
+    border-radius: 30px;
 
     background:
-        rgba(18,22,42,.82);
+        rgba(14,18,35,.88);
 
     border:
         1px solid
-        rgba(255,255,255,.15);
-
-    backdrop-filter:
-        blur(25px);
+        rgba(255,255,255,.16);
 
     box-shadow:
         0 30px 80px
         rgba(0,0,0,.45),
+
         inset 0 1px 0
         rgba(255,255,255,.12);
 
+    backdrop-filter:
+        blur(25px);
+
+    -webkit-backdrop-filter:
+        blur(25px);
 }
 
 
@@ -194,37 +222,37 @@ body::before {
 
     margin: 0;
 
-    font-size: 42px;
+    font-size: 40px;
 
-    letter-spacing: -2px;
-
+    letter-spacing: -1px;
 }
 
 
 .connectBox p {
 
     color:
-        rgba(255,255,255,.6);
+        rgba(255,255,255,.60);
 
+    font-size: 14px;
 }
 
 
 #codeInput {
 
     width: 100%;
-
     height: 60px;
 
     margin-top: 18px;
 
-    border: none;
+    padding: 0 15px;
 
+    border: 0;
     outline: none;
 
-    border-radius: 18px;
+    border-radius: 17px;
 
     background:
-        rgba(0,0,0,.3);
+        rgba(0,0,0,.35);
 
     color: white;
 
@@ -238,44 +266,45 @@ body::before {
 
     box-shadow:
         inset 0 4px 10px
-        rgba(0,0,0,.4);
-
+        rgba(0,0,0,.45);
 }
 
 
 #connectButton {
 
     width: 100%;
-
     height: 58px;
 
-    margin-top: 15px;
+    margin-top: 16px;
 
-    border: none;
+    border: 0;
 
-    border-radius: 18px;
+    border-radius: 17px;
 
     color: white;
 
-    font-size: 16px;
+    font-size: 15px;
 
     font-weight: bold;
 
     background:
         linear-gradient(
             145deg,
-            #65a9ff,
-            #3974e8
+            #6db5ff,
+            #346ee5
         );
 
     box-shadow:
-        0 8px 0 #2454aa,
-        0 14px 25px
-        rgba(0,0,0,.35);
+        0 7px 0 #214b9c,
+        0 13px 25px
+        rgba(0,0,0,.35),
+
+        inset 0 2px 2px
+        rgba(255,255,255,.30);
 
     transition:
-        .12s;
-
+        transform .08s,
+        box-shadow .08s;
 }
 
 
@@ -285,8 +314,9 @@ body::before {
         translateY(6px);
 
     box-shadow:
-        0 2px 0 #2454aa;
-
+        0 1px 0 #214b9c,
+        0 5px 10px
+        rgba(0,0,0,.25);
 }
 
 
@@ -294,12 +324,13 @@ body::before {
 
     min-height: 20px;
 
+    margin-bottom: 0;
 }
 
 
-/* =====================================================
+/* =========================================================
    GAMEPAD
-===================================================== */
+========================================================= */
 
 #gamepad {
 
@@ -310,12 +341,11 @@ body::before {
     width: 100vw;
     height: 100vh;
 
+    overflow: hidden;
 }
 
 
-/* =====================================================
-   PANNEAU PRINCIPAL
-===================================================== */
+/* corps du GamePad */
 
 #gamepad::before {
 
@@ -323,14 +353,18 @@ body::before {
 
     position: absolute;
 
-    inset: 3% 2%;
+    left: 2%;
+    right: 2%;
 
-    border-radius: 55px;
+    top: 3%;
+    bottom: 3%;
+
+    border-radius: 50px;
 
     background:
         linear-gradient(
             145deg,
-            rgba(255,255,255,.09),
+            rgba(255,255,255,.10),
             rgba(255,255,255,.025)
         );
 
@@ -341,18 +375,21 @@ body::before {
     box-shadow:
         0 35px 80px
         rgba(0,0,0,.35),
+
         inset 0 1px 0
         rgba(255,255,255,.12);
 
     backdrop-filter:
-        blur(12px);
+        blur(10px);
 
+    -webkit-backdrop-filter:
+        blur(10px);
 }
 
 
-/* =====================================================
-   ÉCRAN CENTRAL
-===================================================== */
+/* =========================================================
+   ÉCRAN
+========================================================= */
 
 #padScreen {
 
@@ -366,142 +403,120 @@ body::before {
 
     width: 31vw;
     max-width: 420px;
-
-    min-width: 280px;
+    min-width: 260px;
 
     height: 20vw;
     max-height: 270px;
+    min-height: 175px;
 
-    min-height: 180px;
+    padding: 22px;
 
-    border-radius: 28px;
+    z-index: 10;
+
+    color: #111;
+
+    text-align: center;
+
+    border-radius: 27px;
 
     background:
         linear-gradient(
             145deg,
             #ffffff,
-            #e9edf5
+            #e7ebf2
         );
-
-    color: #111;
 
     border:
         5px solid
-        rgba(20,25,40,.75);
+        rgba(20,25,35,.75);
 
     box-shadow:
 
-        0 18px 0
+        0 16px 0
         rgba(0,0,0,.35),
 
-        0 30px 60px
-        rgba(0,0,0,.4),
+        0 28px 55px
+        rgba(0,0,0,.45),
 
         inset 0 2px 3px
         rgba(255,255,255,.9);
-
-    padding: 20px;
-
-    text-align: center;
-
-    z-index: 5;
-
 }
 
 
 #padScreenTitle {
 
-    font-size: 13px;
+    margin-top: 3px;
 
-    font-weight: bold;
+    font-size: 12px;
 
-    color: #737987;
+    font-weight: 800;
+
+    color: #747a86;
 
     letter-spacing: 3px;
-
-    text-transform: uppercase;
-
 }
 
 
 #padScreenGame {
 
-    margin-top: 20px;
+    margin-top: 18px;
 
-    font-size: 36px;
+    font-size: 34px;
 
-    font-weight: 800;
-
+    font-weight: 900;
 }
 
 
 #padScreenHelp {
 
-    margin-top: 16px;
+    margin-top: 15px;
 
-    font-size: 11px;
+    color: #777d88;
 
-    color: #7b808b;
-
+    font-size: 10px;
 }
 
 
-/* =====================================================
-   BOUTONS 3D GÉNÉRIQUES
-===================================================== */
-
-button {
-
-    -webkit-appearance: none;
-
-    border: none;
-
-    outline: none;
-
-    cursor: pointer;
-
-}
-
+/* =========================================================
+   BOUTONS 3D
+========================================================= */
 
 .face,
 .dpad,
 .extra,
 .system {
 
-    position: relative;
+    border: 0;
 
     color: white;
 
     background:
         linear-gradient(
             145deg,
-            #3b4658,
+            #414c5e,
             #171e2a
         );
 
     border:
         1px solid
-        rgba(255,255,255,.16);
+        rgba(255,255,255,.13);
 
     box-shadow:
 
-        0 8px 0
-        #0b0f15,
+        0 7px 0 #090d13,
 
         0 12px 22px
-        rgba(0,0,0,.45),
+        rgba(0,0,0,.40),
 
         inset 0 2px 2px
-        rgba(255,255,255,.14),
+        rgba(255,255,255,.15),
 
-        inset 0 -4px 5px
-        rgba(0,0,0,.3);
+        inset 0 -5px 8px
+        rgba(0,0,0,.25);
 
     transition:
-        transform .08s,
-        box-shadow .08s,
-        filter .08s;
-
+        transform .07s,
+        filter .07s;
 }
 
 
@@ -511,90 +526,56 @@ button {
 .system:active {
 
     transform:
-        translateY(6px);
-
-    box-shadow:
-
-        0 2px 0
-        #0b0f15,
-
-        0 5px 10px
-        rgba(0,0,0,.3),
-
-        inset 0 2px 3px
-        rgba(0,0,0,.25);
+        translateY(5px);
 
     filter:
         brightness(1.25);
-
 }
 
 
-/* =====================================================
-   STICK
-===================================================== */
+/* =========================================================
+   JOYSTICK
+========================================================= */
 
 #stick {
 
     position: absolute;
 
-    left: 7vw;
+    left: 6vw;
     top: 50%;
 
     transform:
         translateY(-50%);
 
-    width: 180px;
-    height: 180px;
+    width: 175px;
+    height: 175px;
+
+    z-index: 6;
 
     border-radius: 50%;
 
     background:
         radial-gradient(
             circle,
-            #222c3c 0%,
-            #121923 65%,
+            #273345 0%,
+            #151c27 62%,
             #080c12 100%
         );
 
     border:
         4px solid
-        rgba(255,255,255,.1);
+        rgba(255,255,255,.09);
 
     box-shadow:
 
         inset 0 10px 20px
-        rgba(0,0,0,.6),
+        rgba(0,0,0,.60),
 
         inset 0 -5px 10px
         rgba(255,255,255,.04),
 
         0 18px 30px
         rgba(0,0,0,.45);
-
-}
-
-
-#stick::after {
-
-    content: "";
-
-    position: absolute;
-
-    left: 15%;
-    top: 12%;
-
-    width: 70%;
-    height: 35%;
-
-    border-radius: 50%;
-
-    background:
-        rgba(255,255,255,.04);
-
-    filter:
-        blur(8px);
-
 }
 
 
@@ -605,28 +586,28 @@ button {
     left: 50%;
     top: 50%;
 
-    width: 84px;
-    height: 84px;
+    width: 82px;
+    height: 82px;
 
-    margin-left: -42px;
-    margin-top: -42px;
+    margin-left: -41px;
+    margin-top: -41px;
 
     border-radius: 50%;
 
     background:
         linear-gradient(
             145deg,
-            #6cb0ff,
-            #275ed0
+            #72b9ff,
+            #2a61d0
         );
 
     border:
         3px solid
-        rgba(255,255,255,.25);
+        rgba(255,255,255,.24);
 
     box-shadow:
 
-        0 9px 0 #183d8b,
+        0 8px 0 #183d8a,
 
         0 15px 25px
         rgba(0,0,0,.5),
@@ -635,28 +616,28 @@ button {
         rgba(255,255,255,.3),
 
         inset 0 -8px 10px
-        rgba(0,0,0,.2);
+        rgba(0,0,0,.20);
 
     transition:
-        transform .05s;
-
+        transform .04s;
 }
 
 
-/* =====================================================
+/* =========================================================
    D-PAD
-===================================================== */
+========================================================= */
 
 #dpad {
 
     position: absolute;
 
-    left: 27vw;
-    bottom: 9vh;
+    left: 26vw;
+    bottom: 10vh;
 
     width: 155px;
     height: 155px;
 
+    z-index: 7;
 }
 
 
@@ -664,15 +645,14 @@ button {
 
     position: absolute;
 
-    width: 53px;
-    height: 53px;
+    width: 52px;
+    height: 52px;
 
-    border-radius: 14px;
+    border-radius: 13px;
 
-    font-size: 21px;
+    font-size: 20px;
 
-    font-weight: bold;
-
+    font-weight: 900;
 }
 
 
@@ -680,7 +660,6 @@ button {
 
     left: 51px;
     top: 0;
-
 }
 
 
@@ -688,7 +667,6 @@ button {
 
     left: 0;
     top: 51px;
-
 }
 
 
@@ -696,7 +674,6 @@ button {
 
     right: 0;
     top: 51px;
-
 }
 
 
@@ -704,45 +681,12 @@ button {
 
     left: 51px;
     bottom: 0;
-
 }
 
 
-/* centre D-pad */
-
-#dpad::after {
-
-    content: "";
-
-    position: absolute;
-
-    left: 51px;
-    top: 51px;
-
-    width: 53px;
-    height: 53px;
-
-    border-radius: 14px;
-
-    background:
-        linear-gradient(
-            145deg,
-            #263141,
-            #121821
-        );
-
-    box-shadow:
-        inset 0 3px 5px
-        rgba(255,255,255,.05);
-
-    pointer-events: none;
-
-}
-
-
-/* =====================================================
+/* =========================================================
    A B X Y
-===================================================== */
+========================================================= */
 
 #faceButtons {
 
@@ -751,12 +695,13 @@ button {
     right: 6vw;
     top: 50%;
 
+    width: 210px;
+    height: 210px;
+
     transform:
         translateY(-50%);
 
-    width: 215px;
-    height: 215px;
-
+    z-index: 8;
 }
 
 
@@ -764,123 +709,104 @@ button {
 
     position: absolute;
 
-    width: 70px;
-    height: 70px;
+    width: 68px;
+    height: 68px;
 
     border-radius: 50%;
 
     font-size: 21px;
 
     font-weight: 900;
-
 }
 
+
+/* Y */
 
 #buttonY {
 
-    left: 72px;
+    left: 71px;
     top: 0;
 
+    background:
+        linear-gradient(
+            145deg,
+            #ffe067,
+            #bd8918
+        );
+
+    box-shadow:
+        0 7px 0 #71530d,
+        0 12px 22px rgba(0,0,0,.4),
+        inset 0 3px 3px rgba(255,255,255,.28);
 }
 
+
+/* X */
 
 #buttonX {
 
     left: 0;
-    top: 72px;
+    top: 71px;
 
+    background:
+        linear-gradient(
+            145deg,
+            #72baff,
+            #326cc4
+        );
+
+    box-shadow:
+        0 7px 0 #1e4785,
+        0 12px 22px rgba(0,0,0,.4),
+        inset 0 3px 3px rgba(255,255,255,.28);
 }
 
+
+/* B */
 
 #buttonB {
 
     right: 0;
-    top: 72px;
+    top: 71px;
 
+    background:
+        linear-gradient(
+            145deg,
+            #ff6b6b,
+            #b52b3b
+        );
+
+    box-shadow:
+        0 7px 0 #721c27,
+        0 12px 22px rgba(0,0,0,.4),
+        inset 0 3px 3px rgba(255,255,255,.28);
 }
 
 
+/* A */
+
 #buttonA {
 
-    left: 72px;
+    left: 71px;
     bottom: 0;
 
-}
-
-
-/* couleurs des boutons */
-
-#buttonA {
-
     background:
         linear-gradient(
             145deg,
-            #62df8b,
-            #218b4c
+            #67e18e,
+            #238b4d
         );
 
     box-shadow:
-        0 8px 0 #14572f,
-        0 13px 22px rgba(0,0,0,.45),
-        inset 0 3px 3px rgba(255,255,255,.25);
-
+        0 7px 0 #14572f,
+        0 12px 22px rgba(0,0,0,.4),
+        inset 0 3px 3px rgba(255,255,255,.28);
 }
 
 
-#buttonB {
-
-    background:
-        linear-gradient(
-            145deg,
-            #ff6868,
-            #b62939
-        );
-
-    box-shadow:
-        0 8px 0 #741b26,
-        0 13px 22px rgba(0,0,0,.45),
-        inset 0 3px 3px rgba(255,255,255,.25);
-
-}
-
-
-#buttonX {
-
-    background:
-        linear-gradient(
-            145deg,
-            #70b6ff,
-            #326bc3
-        );
-
-    box-shadow:
-        0 8px 0 #1d4787,
-        0 13px 22px rgba(0,0,0,.45),
-        inset 0 3px 3px rgba(255,255,255,.25);
-
-}
-
-
-#buttonY {
-
-    background:
-        linear-gradient(
-            145deg,
-            #ffd65e,
-            #c28b17
-        );
-
-    box-shadow:
-        0 8px 0 #76530a,
-        0 13px 22px rgba(0,0,0,.45),
-        inset 0 3px 3px rgba(255,255,255,.25);
-
-}
-
-
-/* =====================================================
+/* =========================================================
    START / SELECT
-===================================================== */
+========================================================= */
 
 #systemButtons {
 
@@ -894,41 +820,37 @@ button {
 
     display: flex;
 
-    gap: 15px;
+    gap: 14px;
 
-    z-index: 10;
-
+    z-index: 20;
 }
 
 
 .system {
 
-    min-width: 90px;
+    min-width: 88px;
 
-    height: 40px;
+    height: 39px;
 
-    padding:
-        0 20px;
+    padding: 0 18px;
 
     border-radius: 20px;
 
     font-size: 10px;
 
-    font-weight: bold;
-
+    font-weight: 800;
 }
 
 
-/* =====================================================
-   BOUTONS HOME / MENU / QUITTER
-===================================================== */
+/* =========================================================
+   HOME / MENU / QUITTER
+========================================================= */
 
 #extraButtons {
 
     position: absolute;
 
     left: 50%;
-
     bottom: 4vh;
 
     transform:
@@ -938,6 +860,7 @@ button {
 
     gap: 12px;
 
+    z-index: 20;
 }
 
 
@@ -952,8 +875,7 @@ button {
 
     font-size: 10px;
 
-    font-weight: bold;
-
+    font-weight: 800;
 }
 
 
@@ -962,14 +884,13 @@ button {
     background:
         linear-gradient(
             145deg,
-            #7c75ff,
-            #4a43b8
+            #817aff,
+            #4b43b9
         );
 
     box-shadow:
-        0 6px 0 #302b78,
+        0 6px 0 #302b79,
         0 10px 20px rgba(0,0,0,.35);
-
 }
 
 
@@ -978,20 +899,19 @@ button {
     background:
         linear-gradient(
             145deg,
-            #ff6464,
-            #a92534
+            #ff6868,
+            #a92937
         );
 
     box-shadow:
         0 6px 0 #681923,
         0 10px 20px rgba(0,0,0,.35);
-
 }
 
 
-/* =====================================================
-   FERMER
-===================================================== */
+/* =========================================================
+   CROIX FERMER
+========================================================= */
 
 #closeButton {
 
@@ -1003,30 +923,33 @@ button {
     width: 44px;
     height: 44px;
 
-    border-radius: 50%;
+    z-index: 30;
 
-    background:
-        linear-gradient(
-            145deg,
-            #3c4657,
-            #151b25
-        );
+    border: 0;
+
+    border-radius: 50%;
 
     color: white;
 
     font-size: 22px;
 
+    background:
+        linear-gradient(
+            145deg,
+            #424c5d,
+            #151b25
+        );
+
     box-shadow:
         0 6px 0 #0b0e13,
         0 10px 20px rgba(0,0,0,.4),
         inset 0 2px 2px rgba(255,255,255,.15);
-
 }
 
 
-/* =====================================================
-   MESSAGE ROTATION
-===================================================== */
+/* =========================================================
+   ROTATION
+========================================================= */
 
 #rotateScreen {
 
@@ -1039,10 +962,15 @@ button {
     z-index: 9999;
 
     align-items: center;
-
     justify-content: center;
 
     text-align: center;
+
+    padding: 30px;
+
+    font-size: 21px;
+
+    font-weight: bold;
 
     background:
         linear-gradient(
@@ -1050,42 +978,30 @@ button {
             #151b42,
             #4c286b
         );
-
-    padding: 35px;
-
-    font-size: 22px;
-
-    font-weight: bold;
-
 }
 
 
-@media(
-    orientation: portrait
-) {
+@media (orientation: portrait) {
 
     #rotateScreen {
-
         display: flex;
-
     }
 
 }
 
 
-/* =====================================================
-   PETITS ECRANS
-===================================================== */
+/* =========================================================
+   PETITS ÉCRANS
+========================================================= */
 
-@media(max-width: 950px) {
+@media (max-width: 950px) {
 
     #stick {
 
-        left: 5vw;
+        left: 4vw;
 
         width: 145px;
         height: 145px;
-
     }
 
 
@@ -1096,59 +1012,54 @@ button {
 
         margin-left: -35px;
         margin-top: -35px;
-
     }
 
 
     #dpad {
 
-        left: 23vw;
+        left: 22vw;
 
         transform:
-            scale(.85);
+            scale(.82);
 
         transform-origin:
             bottom left;
-
     }
 
 
     #faceButtons {
 
-        right: 4vw;
+        right: 3vw;
 
         transform:
             translateY(-50%)
-            scale(.85);
+            scale(.82);
 
         transform-origin:
             center right;
-
     }
 
 
     #padScreen {
 
-        width: 32vw;
+        width: 30vw;
 
-        min-width: 240px;
-
+        min-width: 230px;
     }
 
 }
 
 
-/* =====================================================
-   PETIT ECRAN
-===================================================== */
+/* =========================================================
+   ÉCRANS PEU HAUTS
+========================================================= */
 
-@media(max-height: 600px) {
+@media (max-height: 620px) {
 
     #stick {
 
         width: 125px;
         height: 125px;
-
     }
 
 
@@ -1159,7 +1070,16 @@ button {
 
         margin-left: -31px;
         margin-top: -31px;
+    }
 
+
+    #dpad {
+
+        transform:
+            scale(.70);
+
+        transform-origin:
+            bottom left;
     }
 
 
@@ -1167,23 +1087,65 @@ button {
 
         transform:
             translateY(-50%)
-            scale(.72);
-
-    }
-
-
-    #dpad {
-
-        transform:
-            scale(.72);
-
+            scale(.70);
     }
 
 
     #extraButtons {
 
         bottom: 2vh;
+    }
 
+}
+
+
+/* =========================================================
+   TRÈS PETITS ÉCRANS
+========================================================= */
+
+@media (max-width: 700px) {
+
+    #padScreen {
+
+        min-width: 210px;
+        min-height: 150px;
+
+        height: 170px;
+
+        padding: 15px;
+    }
+
+
+    #padScreenGame {
+
+        font-size: 26px;
+
+        margin-top: 12px;
+    }
+
+
+    #padScreenHelp {
+
+        font-size: 9px;
+    }
+
+
+    #stick {
+
+        left: 3vw;
+
+        width: 115px;
+        height: 115px;
+    }
+
+
+    #stickKnob {
+
+        width: 58px;
+        height: 58px;
+
+        margin-left: -29px;
+        margin-top: -29px;
     }
 
 }
@@ -1196,9 +1158,9 @@ button {
 <body>
 
 
-<!-- =====================================================
-     CONNEXION
-===================================================== -->
+<!-- =========================================================
+     ÉCRAN DE CONNEXION
+========================================================= -->
 
 <section id="connectScreen">
 
@@ -1225,18 +1187,16 @@ button {
             CONNECTER
         </button>
 
-        <p
-            id="connectMessage">
-        </p>
+        <p id="connectMessage"></p>
 
     </div>
 
 </section>
 
 
-<!-- =====================================================
+<!-- =========================================================
      GAMEPAD
-===================================================== -->
+========================================================= -->
 
 <section id="gamepad">
 
@@ -1249,47 +1209,64 @@ button {
     </button>
 
 
-    <!-- START / SELECT -->
+    <!-- SELECT / START -->
 
     <div id="systemButtons">
 
         <button
             class="system"
             id="select">
+
             SELECT
+
         </button>
+
 
         <button
             class="system"
             id="start">
+
             START
+
         </button>
 
     </div>
 
 
-    <!-- ECRAN CENTRAL -->
+    <!-- ÉCRAN CENTRAL -->
 
     <div id="padScreen">
 
         <div id="padScreenTitle">
+
             DUALPLAY GAMEPAD
+
         </div>
+
 
         <div id="padScreenGame">
+
             🐍 Snake
+
         </div>
 
+
         <div id="padScreenHelp">
-            ◀ ▶ CHOISIR &nbsp; • &nbsp;
-            A LANCER &nbsp; • &nbsp;
+
+            ◀ ▶ CHOISIR
+            &nbsp; • &nbsp;
+            A LANCER
+            &nbsp; • &nbsp;
             B RETOUR
+
         </div>
 
     </div>
 
 
-    <!-- STICK -->
+    <!-- =====================================================
+         JOYSTICK
+    ====================================================== -->
 
     <div id="stick">
 
@@ -1298,97 +1275,139 @@ button {
     </div>
 
 
-    <!-- D-PAD -->
+    <!-- =====================================================
+         D-PAD
+    ====================================================== -->
 
     <div id="dpad">
+
 
         <button
             class="dpad"
             id="dpadUp"
             data-button="up">
+
             ▲
+
         </button>
+
 
         <button
             class="dpad"
             id="dpadLeft"
             data-button="left">
+
             ◀
+
         </button>
+
 
         <button
             class="dpad"
             id="dpadRight"
             data-button="right">
+
             ▶
+
         </button>
+
 
         <button
             class="dpad"
             id="dpadDown"
             data-button="down">
+
             ▼
+
         </button>
+
 
     </div>
 
 
-    <!-- A B X Y -->
+    <!-- =====================================================
+         A / B / X / Y
+    ====================================================== -->
 
     <div id="faceButtons">
+
 
         <button
             class="face"
             id="buttonY"
             data-button="Y">
+
             Y
+
         </button>
+
 
         <button
             class="face"
             id="buttonX"
             data-button="X">
+
             X
+
         </button>
+
 
         <button
             class="face"
             id="buttonB"
             data-button="B">
+
             B
+
         </button>
+
 
         <button
             class="face"
             id="buttonA"
             data-button="A">
+
             A
+
         </button>
+
 
     </div>
 
 
-    <!-- BOUTONS DU BAS -->
+    <!-- =====================================================
+         BOUTONS BAS
+    ====================================================== -->
 
     <div id="extraButtons">
+
 
         <button
             class="extra"
             id="homeButton">
+
             HOME
+
         </button>
+
 
         <button
             class="extra"
             id="menuButton">
+
             MENU
+
         </button>
+
 
         <button
             class="extra"
             id="quitButton">
+
             QUITTER
+
         </button>
+
 
     </div>
 
@@ -1396,27 +1415,36 @@ button {
 </section>
 
 
-<!-- =====================================================
+<!-- =========================================================
      ROTATION
-===================================================== -->
+========================================================= -->
 
 <div id="rotateScreen">
 
-    📱
+    <div>
 
-    <br><br>
+        📱↔️
 
-    Tournez votre téléphone
-    à l'horizontale pour utiliser
-    le GamePad.
+        <br><br>
+
+        Tournez votre téléphone
+        à l'horizontale pour utiliser
+        le GamePad.
+
+    </div>
 
 </div>
 
+
+<!-- =========================================================
+     JAVASCRIPT
+========================================================= -->
 
 <script
     type="module"
     src="controller.js">
 </script>
+
 
 </body>
 
