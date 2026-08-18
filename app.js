@@ -1,4 +1,5 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
 import {
     getDatabase,
@@ -7,147 +8,305 @@ import {
     update,
     onValue,
     onDisconnect
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 
-/* =========================================================
+/* =====================================================
    FIREBASE
-========================================================= */
+===================================================== */
 
 const firebaseConfig = {
-    apiKey: "AIzaSyAlUN410WMaCLZU7cjqLDBgZz1DpA2p9po",
-    authDomain: "project-l371.firebaseapp.com",
-    databaseURL: "https://project-l371-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "project-l371",
-    storageBucket: "project-l371.firebasestorage.app",
-    messagingSenderId: "744918953455",
-    appId: "1:744918953455:web:8109247ada892ff5fe1a1a"
+
+    apiKey:
+        "AIzaSyAlUN410WMaCLZU7cjqLDBgZz1DpA2p9po",
+
+    authDomain:
+        "project-l371.firebaseapp.com",
+
+    databaseURL:
+        "https://project-l371-default-rtdb.europe-west1.firebasedatabase.app",
+
+    projectId:
+        "project-l371",
+
+    storageBucket:
+        "project-l371.firebasestorage.app",
+
+    messagingSenderId:
+        "744918953455",
+
+    appId:
+        "1:744918953455:web:8109247ada892ff5fe1a1a"
+
 };
 
-const firebaseApp = initializeApp(firebaseConfig);
-const database = getDatabase(firebaseApp);
+
+const firebaseApp =
+    initializeApp(
+        firebaseConfig
+    );
+
+const database =
+    getDatabase(
+        firebaseApp
+    );
 
 
-/* =========================================================
-   ÉLÉMENTS HTML
-========================================================= */
+/* =====================================================
+   HTML
+===================================================== */
 
 const sessionCodeElement =
-    document.getElementById("sessionCode");
+    document.getElementById(
+        "sessionCode"
+    );
 
 const connectionText =
-    document.getElementById("connectionText");
+    document.getElementById(
+        "connectionText"
+    );
 
 const connectionStatus =
-    document.getElementById("connectionStatus");
+    document.getElementById(
+        "connectionStatus"
+    );
 
 const connectionDot =
-    document.getElementById("connectionDot");
+    document.getElementById(
+        "connectionDot"
+    );
 
 const connectionScreen =
-    document.getElementById("connectionScreen");
+    document.getElementById(
+        "connectionScreen"
+    );
 
 const mainMenu =
-    document.getElementById("mainMenu");
+    document.getElementById(
+        "mainMenu"
+    );
 
 const gameScreen =
-    document.getElementById("gameScreen");
+    document.getElementById(
+        "gameScreen"
+    );
 
 const gameCanvas =
-    document.getElementById("gameCanvas");
+    document.getElementById(
+        "gameCanvas"
+    );
 
 const gameTitle =
-    document.getElementById("gameTitle");
+    document.getElementById(
+        "gameTitle"
+    );
 
+const soundButton =
+    document.getElementById(
+        "soundButton"
+    );
 
-/* =========================================================
-   CANVAS
-========================================================= */
 
 const ctx =
-    gameCanvas.getContext("2d");
+    gameCanvas.getContext(
+        "2d"
+    );
 
 
-/* =========================================================
-   ÉTAT DE LA MANETTE
-========================================================= */
+/* =====================================================
+   MUSIQUE PC
+===================================================== */
 
-let controller = {
+const pcMusic =
+    new Audio(
+        "pc.mp3"
+    );
 
-    connected: false,
+pcMusic.loop =
+    true;
 
-    up: false,
-    down: false,
-    left: false,
-    right: false,
+pcMusic.volume =
+    0.35;
 
-    A: false,
-    B: false,
-    X: false,
-    Y: false,
-
-    start: false,
-    select: false
-};
+let audioEnabled =
+    false;
 
 
-/* =========================================================
-   ÉTAT DU SYSTÈME
-========================================================= */
+/*
+ * Les navigateurs bloquent parfois
+ * l'autoplay.
+ *
+ * Le bouton ne lance aucun jeu :
+ * il ne sert qu'au son.
+ */
 
-let currentGame = null;
+async function enablePCMusic() {
 
-let selectedGame = 0;
+    audioEnabled =
+        true;
 
-let gameRunning = false;
+    try {
+
+        await pcMusic.play();
+
+        soundButton.textContent =
+            "🔊 Son activé";
+
+        soundButton.classList.add(
+            "enabled"
+        );
+
+    }
+    catch (error) {
+
+        console.warn(
+            "Audio bloqué par le navigateur."
+        );
+
+    }
+
+}
 
 
-/* =========================================================
+soundButton.addEventListener(
+    "click",
+    enablePCMusic
+);
+
+
+/* =====================================================
    JEUX
-========================================================= */
+===================================================== */
 
 const games = [
 
     {
-        id: "snake",
-        name: "Snake",
-        icon: "🐍"
+        id:
+            "snake",
+
+        name:
+            "Snake",
+
+        icon:
+            "🐍",
+
+        description:
+            "Faites grandir votre serpent."
+
     },
 
     {
-        id: "pong",
-        name: "Pong",
-        icon: "🏓"
+        id:
+            "pong",
+
+        name:
+            "Pong",
+
+        icon:
+            "🏓",
+
+        description:
+            "Affrontez l'ordinateur."
+
     },
 
     {
-        id: "dodge",
-        name: "Pixel Dodge",
-        icon: "🟦"
+        id:
+            "dodge",
+
+        name:
+            "Pixel Dodge",
+
+        icon:
+            "🟦",
+
+        description:
+            "Évitez les obstacles."
+
     }
 
 ];
 
 
-/* =========================================================
-   JOUEUR
-========================================================= */
+/* =====================================================
+   ÉTAT LOCAL
+===================================================== */
 
-const player = {
+let sessionCode =
+    null;
 
-    x: 500,
-    y: 280,
 
-    size: 45,
+let currentState = {
 
-    speed: 6
+    screen:
+        "connection",
+
+    selectedGame:
+        "snake",
+
+    running:
+        false,
+
+    music:
+        "menu"
 
 };
 
 
-/* =========================================================
-   GÉNÉRER CODE
-========================================================= */
+let controller = {
+
+    connected:
+        false,
+
+    up:
+        false,
+
+    down:
+        false,
+
+    left:
+        false,
+
+    right:
+        false,
+
+    A:
+        false,
+
+    B:
+        false,
+
+    X:
+        false,
+
+    Y:
+        false,
+
+    start:
+        false,
+
+    select:
+        false
+
+};
+
+
+let previousController = {
+
+    A: false,
+    B: false,
+    left: false,
+    right: false,
+    start: false,
+    select: false
+
+};
+
+
+/* =====================================================
+   CODE SESSION
+===================================================== */
 
 function generateSessionCode() {
 
@@ -159,61 +318,86 @@ function generateSessionCode() {
 }
 
 
-/* =========================================================
+/* =====================================================
    CRÉER SESSION
-========================================================= */
+===================================================== */
 
 async function createSession() {
 
-    let code = generateSessionCode();
+    sessionCode =
+        generateSessionCode();
 
-    let sessionReference =
+
+    const sessionRef =
         ref(
             database,
-            "sessions/" + code
+            "sessions/" +
+            sessionCode
         );
-
-
-    console.log(
-        "Création de la session :",
-        code
-    );
 
 
     const initialData = {
 
-        createdAt: Date.now(),
+        createdAt:
+            Date.now(),
 
         pc: {
 
-            connected: true
+            connected:
+                true
 
         },
 
         controller: {
 
-            connected: false,
+            connected:
+                false,
 
-            up: false,
-            down: false,
-            left: false,
-            right: false,
+            up:
+                false,
 
-            A: false,
-            B: false,
-            X: false,
-            Y: false,
+            down:
+                false,
 
-            start: false,
-            select: false
+            left:
+                false,
+
+            right:
+                false,
+
+            A:
+                false,
+
+            B:
+                false,
+
+            X:
+                false,
+
+            Y:
+                false,
+
+            start:
+                false,
+
+            select:
+                false
 
         },
 
-        game: {
+        state: {
 
-            selected: "snake",
+            screen:
+                "connection",
 
-            running: false
+            selectedGame:
+                "snake",
+
+            running:
+                false,
+
+            music:
+                "menu"
 
         }
 
@@ -221,15 +405,18 @@ async function createSession() {
 
 
     await set(
-        sessionReference,
+        sessionRef,
         initialData
     );
 
 
-    /* Affichage du code */
+    await onDisconnect(
+        sessionRef
+    ).remove();
+
 
     sessionCodeElement.textContent =
-        code;
+        sessionCode;
 
 
     connectionText.textContent =
@@ -240,48 +427,37 @@ async function createSession() {
         "En attente";
 
 
-    /* Suppression automatique */
+    listenController();
 
-    onDisconnect(
-        sessionReference
-    ).remove();
-
-
-    /* Écouter la manette */
-
-    listenToController(code);
-
-
-    /* Écouter les changements de jeu */
-
-    listenToGame(code);
+    listenState();
 
 
     console.log(
-        "Session Firebase créée !"
+        "Session créée :",
+        sessionCode
     );
 
 }
 
 
-/* =========================================================
-   ÉCOUTER LA MANETTE
-========================================================= */
+/* =====================================================
+   ÉCOUTER MANETTE
+===================================================== */
 
-function listenToController(code) {
+function listenController() {
 
-    const controllerReference =
+    const controllerRef =
         ref(
             database,
             "sessions/" +
-            code +
+            sessionCode +
             "/controller"
         );
 
 
     onValue(
-        controllerReference,
-        (snapshot) => {
+        controllerRef,
+        snapshot => {
 
             const data =
                 snapshot.val();
@@ -332,7 +508,10 @@ function listenToController(code) {
             };
 
 
-            updateConnectionInterface();
+            updateConnection();
+
+
+            processButtons();
 
         }
     );
@@ -340,13 +519,82 @@ function listenToController(code) {
 }
 
 
-/* =========================================================
+/* =====================================================
+   ÉCOUTER ÉTAT GLOBAL
+===================================================== */
+
+function listenState() {
+
+    const stateRef =
+        ref(
+            database,
+            "sessions/" +
+            sessionCode +
+            "/state"
+        );
+
+
+    onValue(
+        stateRef,
+        snapshot => {
+
+            const data =
+                snapshot.val();
+
+
+            if (!data) {
+
+                return;
+
+            }
+
+
+            currentState = {
+
+                screen:
+                    data.screen ||
+                    "connection",
+
+                selectedGame:
+                    data.selectedGame ||
+                    "snake",
+
+                running:
+                    data.running === true,
+
+                music:
+                    data.music ||
+                    "menu"
+
+            };
+
+
+            /*
+             * IMPORTANT :
+             *
+             * Toute modification venant
+             * du téléphone arrive ici.
+             */
+
+            updatePCInterface();
+
+            updateMusic();
+
+        }
+    );
+
+}
+
+
+/* =====================================================
    CONNEXION
-========================================================= */
+===================================================== */
 
-function updateConnectionInterface() {
+function updateConnection() {
 
-    if (controller.connected) {
+    if (
+        controller.connected
+    ) {
 
         connectionStatus.textContent =
             "Téléphone connecté";
@@ -356,29 +604,10 @@ function updateConnectionInterface() {
         );
 
         connectionText.textContent =
-            "🎮 Manette connectée !";
+            "🎮 GamePad connecté";
 
-
-        /*
-         * IMPORTANT :
-         * On affiche maintenant le MENU
-         * au lieu de lancer directement le jeu.
-         */
-
-        connectionScreen.style.display =
-            "none";
-
-        gameScreen.style.display =
-            "none";
-
-        mainMenu.style.display =
-            "flex";
-
-
-        updateSelectedGame();
-
-
-    } else {
+    }
+    else {
 
         connectionStatus.textContent =
             "En attente";
@@ -395,292 +624,355 @@ function updateConnectionInterface() {
 }
 
 
-/* =========================================================
-   ÉCOUTER LE JEU
-========================================================= */
+/* =====================================================
+   TROUVER JEU
+===================================================== */
 
-function listenToGame(code) {
+function getGameIndex(id) {
 
-    const gameReference =
-        ref(
-            database,
-            "sessions/" +
-            code +
-            "/game"
+    const index =
+        games.findIndex(
+            game =>
+                game.id === id
         );
 
 
-    onValue(
-        gameReference,
-        (snapshot) => {
+    if (index < 0) {
 
-            const data =
-                snapshot.val();
+        return 0;
 
-
-            if (!data) {
-
-                return;
-
-            }
+    }
 
 
-            if (data.selected) {
+    return index;
 
-                const index =
-                    games.findIndex(
-                        game =>
-                            game.id ===
-                            data.selected
-                    );
+}
 
 
-                if (index !== -1) {
+/* =====================================================
+   INTERFACE PC
+===================================================== */
 
-                    selectedGame =
-                        index;
+function updatePCInterface() {
 
-                }
+    const index =
+        getGameIndex(
+            currentState.selectedGame
+        );
 
-            }
 
+    /*
+     * Sélection visuelle
+     */
 
-            if (data.running === true) {
+    document
+        .querySelectorAll(
+            ".gameCard"
+        )
+        .forEach(
+            (card, cardIndex) => {
 
-                startSelectedGame(
-                    false
+                card.classList.toggle(
+                    "selected",
+                    cardIndex === index
                 );
 
             }
-
-        }
-    );
-
-}
+        );
 
 
-/* =========================================================
-   CARTES DU MENU
-========================================================= */
+    /*
+     * Écran
+     */
 
-const gameCards =
-    document.querySelectorAll(
-        ".gameCard"
-    );
+    if (
+        currentState.screen ===
+        "menu"
+    ) {
 
+        connectionScreen.style.display =
+            "none";
 
-function updateSelectedGame() {
+        gameScreen.style.display =
+            "none";
 
-    gameCards.forEach(
-        (card, index) => {
-
-            card.classList.toggle(
-                "selected",
-                index === selectedGame
-            );
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   CHANGER DE JEU
-========================================================= */
-
-async function changeGame(direction) {
-
-    selectedGame +=
-        direction;
-
-
-    if (selectedGame < 0) {
-
-        selectedGame =
-            games.length - 1;
+        mainMenu.style.display =
+            "flex";
 
     }
 
 
     if (
-        selectedGame >=
-        games.length
+        currentState.screen ===
+        "game"
     ) {
 
-        selectedGame = 0;
+        connectionScreen.style.display =
+            "none";
+
+        mainMenu.style.display =
+            "none";
+
+        gameScreen.style.display =
+            "flex";
+
+
+        const game =
+            games[index];
+
+
+        gameTitle.textContent =
+            game.icon +
+            " " +
+            game.name;
 
     }
 
 
-    updateSelectedGame();
+    if (
+        currentState.screen ===
+        "connection"
+    ) {
+
+        connectionScreen.style.display =
+            "flex";
+
+        mainMenu.style.display =
+            "none";
+
+        gameScreen.style.display =
+            "none";
+
+    }
+
+}
 
 
-    if (!window.currentSessionCode) {
+/* =====================================================
+   MUSIQUE SYNCHRONISÉE
+===================================================== */
+
+function updateMusic() {
+
+    if (!audioEnabled) {
 
         return;
 
     }
 
 
-    const selected =
-        games[selectedGame];
+    /*
+     * Pour l'instant :
+     *
+     * menu = pc.mp3
+     * game = pc.mp3
+     *
+     * Tu peux ensuite mettre
+     * une musique différente
+     * pour chaque jeu.
+     */
+
+    if (
+        currentState.music ===
+        "menu"
+    ) {
+
+        if (
+            pcMusic.paused
+        ) {
+
+            pcMusic.play()
+                .catch(
+                    () => {}
+                );
+
+        }
+
+    }
+
+
+    if (
+        currentState.music ===
+        "game"
+    ) {
+
+        if (
+            pcMusic.paused
+        ) {
+
+            pcMusic.play()
+                .catch(
+                    () => {}
+                );
+
+        }
+
+    }
+
+}
+
+
+/* =====================================================
+   ÉCRIRE ÉTAT
+===================================================== */
+
+async function setState(
+    changes
+) {
+
+    if (!sessionCode) {
+
+        return;
+
+    }
 
 
     await update(
+
         ref(
             database,
             "sessions/" +
-            window.currentSessionCode +
-            "/game"
+            sessionCode +
+            "/state"
         ),
-        {
 
-            selected:
-                selected.id,
+        changes
 
-            running:
-                false
-
-        }
     );
 
 }
 
 
-/* =========================================================
-   LANCER LE JEU
-========================================================= */
+/* =====================================================
+   CHANGER JEU
+===================================================== */
 
-async function startSelectedGame(
-    sendToFirebase = true
+async function selectGame(
+    direction
 ) {
 
-    const selected =
-        games[selectedGame];
+    const currentIndex =
+        getGameIndex(
+            currentState.selectedGame
+        );
 
 
-    currentGame =
-        selected.id;
-
-
-    gameRunning = true;
-
-
-    mainMenu.style.display =
-        "none";
-
-    connectionScreen.style.display =
-        "none";
-
-    gameScreen.style.display =
-        "flex";
-
-
-    gameTitle.textContent =
-        selected.icon +
-        " " +
-        selected.name;
-
-
-    player.x =
-        gameCanvas.width / 2;
-
-    player.y =
-        gameCanvas.height / 2;
+    let newIndex =
+        currentIndex +
+        direction;
 
 
     if (
-        sendToFirebase &&
-        window.currentSessionCode
+        newIndex < 0
     ) {
 
-        await update(
-            ref(
-                database,
-                "sessions/" +
-                window.currentSessionCode +
-                "/game"
-            ),
-            {
-
-                selected:
-                    selected.id,
-
-                running:
-                    true
-
-            }
-        );
+        newIndex =
+            games.length - 1;
 
     }
 
-}
 
+    if (
+        newIndex >=
+        games.length
+    ) {
 
-/* =========================================================
-   RETOUR MENU
-========================================================= */
-
-async function returnToMenu() {
-
-    gameRunning = false;
-
-    currentGame = null;
-
-
-    gameScreen.style.display =
-        "none";
-
-    mainMenu.style.display =
-        "flex";
-
-
-    updateSelectedGame();
-
-
-    if (window.currentSessionCode) {
-
-        await update(
-            ref(
-                database,
-                "sessions/" +
-                window.currentSessionCode +
-                "/game"
-            ),
-            {
-
-                running:
-                    false
-
-            }
-        );
+        newIndex = 0;
 
     }
 
-}
 
+    const newGame =
+        games[newIndex];
 
-/* =========================================================
-   COMMANDES MANETTE
-========================================================= */
-
-let previousController = {
-
-    A: false,
-    B: false,
-    left: false,
-    right: false,
-    start: false,
-    select: false
-
-};
-
-
-function processControllerButtons() {
 
     /*
-     * GAUCHE
+     * UNE SEULE source de vérité :
+     */
+
+    await setState({
+
+        selectedGame:
+            newGame.id,
+
+        screen:
+            "menu",
+
+        running:
+            false,
+
+        music:
+            "menu"
+
+    });
+
+}
+
+
+/* =====================================================
+   LANCER JEU
+===================================================== */
+
+async function launchGame() {
+
+    const game =
+        games[
+            getGameIndex(
+                currentState.selectedGame
+            )
+        ];
+
+
+    await setState({
+
+        screen:
+            "game",
+
+        selectedGame:
+            game.id,
+
+        running:
+            true,
+
+        music:
+            "game"
+
+    });
+
+}
+
+
+/* =====================================================
+   RETOUR MENU
+===================================================== */
+
+async function backToMenu() {
+
+    await setState({
+
+        screen:
+            "menu",
+
+        running:
+            false,
+
+        music:
+            "menu"
+
+    });
+
+}
+
+
+/* =====================================================
+   BOUTONS
+===================================================== */
+
+function processButtons() {
+
+
+    /*
+     * ←
      */
 
     if (
@@ -688,9 +980,12 @@ function processControllerButtons() {
         !previousController.left
     ) {
 
-        if (!gameRunning) {
+        if (
+            currentState.screen ===
+            "menu"
+        ) {
 
-            changeGame(-1);
+            selectGame(-1);
 
         }
 
@@ -698,7 +993,7 @@ function processControllerButtons() {
 
 
     /*
-     * DROITE
+     * →
      */
 
     if (
@@ -706,9 +1001,12 @@ function processControllerButtons() {
         !previousController.right
     ) {
 
-        if (!gameRunning) {
+        if (
+            currentState.screen ===
+            "menu"
+        ) {
 
-            changeGame(1);
+            selectGame(1);
 
         }
 
@@ -724,45 +1022,12 @@ function processControllerButtons() {
         !previousController.A
     ) {
 
-        if (!gameRunning) {
+        if (
+            currentState.screen ===
+            "menu"
+        ) {
 
-            startSelectedGame();
-
-        }
-
-    }
-
-
-    /*
-     * B
-     */
-
-    if (
-        controller.B &&
-        !previousController.B
-    ) {
-
-        if (gameRunning) {
-
-            returnToMenu();
-
-        }
-
-    }
-
-
-    /*
-     * SELECT
-     */
-
-    if (
-        controller.select &&
-        !previousController.select
-    ) {
-
-        if (gameRunning) {
-
-            returnToMenu();
+            launchGame();
 
         }
 
@@ -778,9 +1043,54 @@ function processControllerButtons() {
         !previousController.start
     ) {
 
-        if (!gameRunning) {
+        if (
+            currentState.screen ===
+            "menu"
+        ) {
 
-            startSelectedGame();
+            launchGame();
+
+        }
+
+    }
+
+
+    /*
+     * B
+     */
+
+    if (
+        controller.B &&
+        !previousController.B
+    ) {
+
+        if (
+            currentState.screen ===
+            "game"
+        ) {
+
+            backToMenu();
+
+        }
+
+    }
+
+
+    /*
+     * SELECT
+     */
+
+    if (
+        controller.select &&
+        !previousController.select
+    ) {
+
+        if (
+            currentState.screen ===
+            "game"
+        ) {
+
+            backToMenu();
 
         }
 
@@ -789,118 +1099,94 @@ function processControllerButtons() {
 
     previousController = {
 
-        A: controller.A,
+        A:
+            controller.A,
 
-        B: controller.B,
+        B:
+            controller.B,
 
-        left: controller.left,
+        left:
+            controller.left,
 
-        right: controller.right,
+        right:
+            controller.right,
 
-        start: controller.start,
+        start:
+            controller.start,
 
-        select: controller.select
+        select:
+            controller.select
 
     };
 
 }
 
 
-/* =========================================================
-   JEU
-========================================================= */
+/* =====================================================
+   JEU : SNAKE
+===================================================== */
 
-function updatePlayer() {
+let snake = [];
+let snakeDirection = {
+    x: 1,
+    y: 0
+};
 
-    if (!gameRunning) {
-
-        return;
-
-    }
-
-
-    if (controller.left) {
-
-        player.x -=
-            player.speed;
-
-    }
+let snakeFood = {
+    x: 10,
+    y: 10
+};
 
 
-    if (controller.right) {
+function resetSnake() {
 
-        player.x +=
-            player.speed;
+    snake = [
 
-    }
+        {
+            x: 10,
+            y: 7
+        },
 
+        {
+            x: 9,
+            y: 7
+        },
 
-    if (controller.up) {
+        {
+            x: 8,
+            y: 7
+        }
 
-        player.y -=
-            player.speed;
+    ];
 
-    }
+    snakeDirection = {
+        x: 1,
+        y: 0
+    };
 
+    snakeFood = {
 
-    if (controller.down) {
+        x:
+            Math.floor(
+                Math.random() *
+                25
+            ),
 
-        player.y +=
-            player.speed;
+        y:
+            Math.floor(
+                Math.random() *
+                14
+            )
 
-    }
-
-
-    const half =
-        player.size / 2;
-
-
-    if (player.x < half) {
-
-        player.x = half;
-
-    }
-
-
-    if (
-        player.x >
-        gameCanvas.width - half
-    ) {
-
-        player.x =
-            gameCanvas.width - half;
-
-    }
-
-
-    if (player.y < half) {
-
-        player.y = half;
-
-    }
-
-
-    if (
-        player.y >
-        gameCanvas.height - half
-    ) {
-
-        player.y =
-            gameCanvas.height - half;
-
-    }
+    };
 
 }
 
 
-/* =========================================================
-   DESSIN
-========================================================= */
-
-function drawGame() {
+function drawSnake() {
 
     ctx.fillStyle =
-        "#101722";
+        "#0b1220";
 
     ctx.fillRect(
         0,
@@ -910,79 +1196,393 @@ function drawGame() {
     );
 
 
+    const cellW =
+        gameCanvas.width / 25;
+
+    const cellH =
+        gameCanvas.height / 14;
+
+
+    ctx.fillStyle =
+        "#ef4444";
+
+    ctx.fillRect(
+
+        snakeFood.x *
+            cellW,
+
+        snakeFood.y *
+            cellH,
+
+        cellW - 2,
+        cellH - 2
+
+    );
+
+
+    snake.forEach(
+        (part, index) => {
+
+            ctx.fillStyle =
+                index === 0
+                    ? "#4ade80"
+                    : "#22c55e";
+
+
+            ctx.fillRect(
+
+                part.x *
+                    cellW,
+
+                part.y *
+                    cellH,
+
+                cellW - 2,
+                cellH - 2
+
+            );
+
+        }
+    );
+
+}
+
+
+let snakeTimer =
+    0;
+
+
+function updateSnake() {
+
     /*
-     * Grille
+     * Contrôles
      */
+
+    if (
+        controller.up &&
+        snakeDirection.y === 0
+    ) {
+
+        snakeDirection = {
+            x: 0,
+            y: -1
+        };
+
+    }
+
+    if (
+        controller.down &&
+        snakeDirection.y === 0
+    ) {
+
+        snakeDirection = {
+            x: 0,
+            y: 1
+        };
+
+    }
+
+    if (
+        controller.left &&
+        snakeDirection.x === 0
+    ) {
+
+        snakeDirection = {
+            x: -1,
+            y: 0
+        };
+
+    }
+
+    if (
+        controller.right &&
+        snakeDirection.x === 0
+    ) {
+
+        snakeDirection = {
+            x: 1,
+            y: 0
+        };
+
+    }
+
+
+    snakeTimer++;
+
+
+    if (
+        snakeTimer < 8
+    ) {
+
+        return;
+
+    }
+
+
+    snakeTimer = 0;
+
+
+    const head = {
+
+        x:
+            snake[0].x +
+            snakeDirection.x,
+
+        y:
+            snake[0].y +
+            snakeDirection.y
+
+    };
+
+
+    /*
+     * Murs
+     */
+
+    if (
+        head.x < 0 ||
+        head.x >= 25 ||
+        head.y < 0 ||
+        head.y >= 14
+    ) {
+
+        resetSnake();
+
+        return;
+
+    }
+
+
+    /*
+     * Corps
+     */
+
+    for (
+        const part of snake
+    ) {
+
+        if (
+            part.x === head.x &&
+            part.y === head.y
+        ) {
+
+            resetSnake();
+
+            return;
+
+        }
+
+    }
+
+
+    snake.unshift(
+        head
+    );
+
+
+    if (
+        head.x ===
+            snakeFood.x &&
+        head.y ===
+            snakeFood.y
+    ) {
+
+        snakeFood = {
+
+            x:
+                Math.floor(
+                    Math.random() *
+                    25
+                ),
+
+            y:
+                Math.floor(
+                    Math.random() *
+                    14
+                )
+
+        };
+
+    }
+    else {
+
+        snake.pop();
+
+    }
+
+}
+
+
+/* =====================================================
+   DESSIN PONG
+===================================================== */
+
+let pongBall = {
+
+    x: 500,
+    y: 280,
+
+    vx: 5,
+    vy: 3
+
+};
+
+
+function drawPong() {
+
+    ctx.fillStyle =
+        "#050505";
+
+    ctx.fillRect(
+        0,
+        0,
+        gameCanvas.width,
+        gameCanvas.height
+    );
+
 
     ctx.strokeStyle =
-        "#1b2635";
+        "#333";
 
-    ctx.lineWidth = 1;
+    ctx.setLineDash(
+        [10, 10]
+    );
 
+    ctx.beginPath();
 
-    for (
-        let x = 0;
-        x < gameCanvas.width;
-        x += 50
-    ) {
+    ctx.moveTo(
+        500,
+        0
+    );
 
-        ctx.beginPath();
+    ctx.lineTo(
+        500,
+        562
+    );
 
-        ctx.moveTo(
-            x,
-            0
-        );
+    ctx.stroke();
 
-        ctx.lineTo(
-            x,
-            gameCanvas.height
-        );
+    ctx.setLineDash([]);
 
-        ctx.stroke();
-
-    }
-
-
-    for (
-        let y = 0;
-        y < gameCanvas.height;
-        y += 50
-    ) {
-
-        ctx.beginPath();
-
-        ctx.moveTo(
-            0,
-            y
-        );
-
-        ctx.lineTo(
-            gameCanvas.width,
-            y
-        );
-
-        ctx.stroke();
-
-    }
-
-
-    /*
-     * Titre
-     */
-
-    ctx.textAlign =
-        "center";
 
     ctx.fillStyle =
         "white";
 
-    ctx.font =
-        "bold 28px Arial";
 
-    ctx.fillText(
-        games[selectedGame].name,
-        gameCanvas.width / 2,
-        45
+    /*
+     * Joueur
+     */
+
+    const playerY =
+        250 +
+        (
+            controller.up
+                ? -120
+                : controller.down
+                    ? 120
+                    : 0
+        );
+
+
+    ctx.fillRect(
+        30,
+        playerY,
+        15,
+        100
+    );
+
+
+    /*
+     * Adversaire
+     */
+
+    ctx.fillRect(
+        955,
+        pongBall.y - 50,
+        15,
+        100
+    );
+
+
+    /*
+     * Balle
+     */
+
+    ctx.beginPath();
+
+    ctx.arc(
+        pongBall.x,
+        pongBall.y,
+        10,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.fill();
+
+
+    pongBall.x +=
+        pongBall.vx;
+
+    pongBall.y +=
+        pongBall.vy;
+
+
+    if (
+        pongBall.y < 0 ||
+        pongBall.y > 562
+    ) {
+
+        pongBall.vy *= -1;
+
+    }
+
+
+    if (
+        pongBall.x < 0 ||
+        pongBall.x > 1000
+    ) {
+
+        pongBall = {
+
+            x: 500,
+            y: 280,
+
+            vx:
+                pongBall.x < 0
+                    ? 5
+                    : -5,
+
+            vy: 3
+
+        };
+
+    }
+
+}
+
+
+/* =====================================================
+   DODGE
+===================================================== */
+
+let dodgeX =
+    500;
+
+let dodgeObstacle =
+    0;
+
+
+function drawDodge() {
+
+    ctx.fillStyle =
+        "#111827";
+
+    ctx.fillRect(
+        0,
+        0,
+        1000,
+        562
     );
 
 
@@ -990,74 +1590,128 @@ function drawGame() {
      * Joueur
      */
 
+    if (
+        controller.left
+    ) {
+
+        dodgeX -= 7;
+
+    }
+
+    if (
+        controller.right
+    ) {
+
+        dodgeX += 7;
+
+    }
+
+
+    dodgeX =
+        Math.max(
+            30,
+            Math.min(
+                970,
+                dodgeX
+            )
+        );
+
+
     ctx.fillStyle =
-        "#4d9cff";
+        "#60a5fa";
 
     ctx.fillRect(
-
-        player.x -
-        player.size / 2,
-
-        player.y -
-        player.size / 2,
-
-        player.size,
-        player.size
-
+        dodgeX - 25,
+        500,
+        50,
+        30
     );
 
 
     /*
-     * Indication
+     * Obstacle
      */
 
-    ctx.font =
-        "16px Arial";
+    dodgeObstacle += 5;
+
+
+    if (
+        dodgeObstacle > 590
+    ) {
+
+        dodgeObstacle = -30;
+
+    }
+
 
     ctx.fillStyle =
-        "#888";
+        "#f43f5e";
 
-    ctx.fillText(
-        "Téléphone utilisé comme manette",
-        gameCanvas.width / 2,
-        gameCanvas.height - 25
+    ctx.fillRect(
+        400,
+        dodgeObstacle,
+        200,
+        35
     );
 
+}
 
-    /*
-     * A
-     */
 
-    if (controller.A) {
+/* =====================================================
+   DESSIN JEU
+===================================================== */
 
-        ctx.fillStyle =
-            "white";
+function drawCurrentGame() {
 
-        ctx.font =
-            "bold 20px Arial";
+    if (
+        currentState.selectedGame ===
+        "snake"
+    ) {
 
-        ctx.fillText(
-            "A",
-            player.x,
-            player.y - 35
-        );
+        updateSnake();
+
+        drawSnake();
+
+    }
+
+
+    else if (
+        currentState.selectedGame ===
+        "pong"
+    ) {
+
+        drawPong();
+
+    }
+
+
+    else if (
+        currentState.selectedGame ===
+        "dodge"
+    ) {
+
+        drawDodge();
 
     }
 
 }
 
 
-/* =========================================================
+/* =====================================================
    BOUCLE
-========================================================= */
+===================================================== */
 
 function gameLoop() {
 
-    processControllerButtons();
+    if (
+        currentState.running &&
+        currentState.screen ===
+        "game"
+    ) {
 
-    updatePlayer();
+        drawCurrentGame();
 
-    drawGame();
+    }
 
     requestAnimationFrame(
         gameLoop
@@ -1066,67 +1720,31 @@ function gameLoop() {
 }
 
 
-/* =========================================================
-   CLIC SUR LES JEUX
-========================================================= */
-
-gameCards.forEach(
-    (card, index) => {
-
-        card.addEventListener(
-            "click",
-            () => {
-
-                selectedGame =
-                    index;
-
-                updateSelectedGame();
-
-                startSelectedGame();
-
-            }
-        );
-
-    }
-);
-
-
-/* =========================================================
+/* =====================================================
    DÉMARRAGE
-========================================================= */
+===================================================== */
 
 async function start() {
 
     try {
 
-        connectionStatus.textContent =
-            "Connexion...";
-
-
         await createSession();
 
-
-        connectionStatus.textContent =
-            "En attente";
-
+        resetSnake();
 
         gameLoop();
 
-
-    } catch (error) {
+    }
+    catch (error) {
 
         console.error(
-            "Erreur Firebase :",
             error
         );
 
-
         connectionStatus.textContent =
-            "Erreur";
-
+            "Erreur Firebase";
 
         connectionText.textContent =
-            "Erreur Firebase : " +
             error.message;
 
     }
